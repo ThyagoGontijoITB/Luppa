@@ -1,0 +1,106 @@
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef8fb 0%, #ffffff 48%, #dff5fd 100%);
+  color: #2c3133;
+  font-family: Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 48px 20px;
+}
+
+.shell {
+  width: min(1000px, 100%);
+  margin: 0 auto;
+}
+
+.backLink {
+  color: #269cca;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.header {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin: 40px 0 28px;
+}
+
+.logo {
+  display: flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #04b0f5, #3883a0);
+  color: white;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.header h1 {
+  color: #2c3133;
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 0 0 8px;
+}
+
+.header p {
+  color: #33444b;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.panel {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #d6e3e8;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 12px 32px rgba(44, 49, 51, 0.08);
+  padding: 28px;
+}
+
+.panel h2 {
+  color: #2c3133;
+  margin: 0;
+}
+
+.panel label {
+  display: grid;
+  gap: 8px;
+  color: #2c3133;
+  font-weight: 700;
+}
+
+.panel input {
+  border: 1px solid #d6e3e8;
+  border-radius: 10px;
+  color: #2c3133;
+  font: inherit;
+  padding: 12px 14px;
+}
+
+.panel button {
+  border: 0;
+  border-radius: 999px;
+  background: #04b0f5;
+  color: white;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 13px 18px;
+}
+
+@media (max-width: 760px) {
+  .grid,
+  .header {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

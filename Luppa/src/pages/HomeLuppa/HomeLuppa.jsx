@@ -1,11 +1,7 @@
-
+import MenuLuppa from '../MenuLuppa/MenuLuppa'
 
 const HomeLuppa = () => {
-
-    return (
-        <div>
-            
-        </div>
-    )
+  return <MenuLuppa />
 }
+
 export default HomeLuppa
