@@ -1,0 +1,191 @@
+.dashboard {
+  display: grid;
+  gap: 16px;
+}
+
+.metricGrid,
+.chartGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.metricGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.chartGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metricCard,
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.metricCard {
+  padding: 14px;
+}
+
+.metricCard span {
+  color: var(--color-text-secondary);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.metricCard strong {
+  display: block;
+  color: var(--color-text-primary);
+  font-size: 1.65rem;
+  font-weight: 760;
+  line-height: 1.1;
+  margin-top: 10px;
+}
+
+.panel {
+  min-width: 0;
+  padding: 16px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panelHeader h2 {
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 750;
+  margin: 0;
+}
+
+.empty {
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-inset);
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  margin: 0;
+  padding: 12px;
+}
+
+.barList,
+.ranking {
+  display: grid;
+  gap: 12px;
+}
+
+.barRow {
+  display: grid;
+  gap: 7px;
+}
+
+.barMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.barMeta span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barMeta strong {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.barTrack {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-surface-inset);
+}
+
+.barTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+
+.rankItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-secondary);
+  padding: 12px;
+}
+
+.rankNumber {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-active);
+  font-weight: 800;
+}
+
+.rankItem h3 {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 0.96rem;
+  margin: 0 0 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankItem p {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 0.84rem;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankItem strong {
+  display: grid;
+  justify-items: end;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.rankItem small {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .metricGrid,
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .rankItem {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .rankItem strong {
+    grid-column: 2;
+    justify-items: start;
+  }
+}

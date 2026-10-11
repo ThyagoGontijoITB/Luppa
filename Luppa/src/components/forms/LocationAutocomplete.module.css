@@ -1,0 +1,101 @@
+.field {
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  gap: 8px;
+}
+
+.field label {
+  display: grid;
+  gap: 7px;
+}
+
+.field label > span,
+.selected > span {
+  color: var(--color-text-primary);
+  font-size: 0.88rem;
+  font-weight: 740;
+}
+
+.suggestions {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.suggestions button {
+  display: grid;
+  gap: 4px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding: 12px;
+  text-align: left;
+}
+
+.suggestions button:last-child {
+  border-bottom: 0;
+}
+
+.suggestions button:hover,
+.suggestions button:focus-visible {
+  background: var(--color-surface-subtle);
+}
+
+.suggestions strong {
+  color: var(--color-text-primary);
+}
+
+.suggestions span,
+.selected p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.suggestions small {
+  color: var(--color-text-muted);
+  font-weight: 650;
+}
+
+.selected {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-secondary);
+  padding: 12px;
+}
+
+.selected > span {
+  color: var(--color-primary-active);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.selected strong {
+  color: var(--color-text-primary);
+}
+
+.selected p,
+.state {
+  color: var(--color-text-secondary);
+  font-size: 0.88rem;
+}
+
+.state {
+  margin: 0;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.84rem;
+  font-weight: 700;
+}

@@ -1,0 +1,107 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  display: grid;
+  place-items: center;
+  background: rgba(14, 23, 28, 0.58);
+  padding: 18px;
+}
+
+.dialog {
+  display: grid;
+  gap: 14px;
+  width: min(520px, 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  padding: 22px;
+}
+
+.dialog span {
+  color: var(--color-primary-active);
+  font-size: 0.74rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dialog h2 {
+  color: var(--color-text-primary);
+  font-size: 1.35rem;
+  margin: 5px 0;
+}
+
+.dialog p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.subject {
+  display: block;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.5;
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.dialog label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.dialog select,
+.dialog textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.dialog textarea {
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.actions button {
+  min-height: 38px;
+  border-radius: var(--radius-sm);
+  font-weight: 740;
+  padding: 0 14px;
+}
+
+.actions button:first-child {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+.actions button:last-child {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.error {
+  color: var(--color-danger) !important;
+  font-weight: 700;
+}

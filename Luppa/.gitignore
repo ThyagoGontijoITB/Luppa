@@ -10,7 +10,16 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+target
+backend/target
+backend/uploads/
+.chrome-*
 *.local
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.properties
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +31,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local verification/probe artifacts
+*.class
+codex-*
+overflow-probe-*
+overflow-fixtures/
+map-runtime-check.png
+vite-*.log
+
+# Local SQL Server/database files
+*.mdf
+*.ldf
+*.bak

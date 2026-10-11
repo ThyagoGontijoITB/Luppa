@@ -1,0 +1,209 @@
+.viewport {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  display: grid;
+  gap: 10px;
+  width: min(390px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.toast {
+  --toast-accent: var(--color-primary);
+  --toast-accent-soft: rgba(0, 156, 255, 0.13);
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  max-height: 104px;
+  border: 1px solid color-mix(in srgb, var(--toast-accent) 24%, var(--color-border));
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, var(--toast-accent) 0 4px, transparent 4px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 255, 0.94));
+  box-shadow: 0 18px 44px rgba(23, 33, 38, 0.16), 0 2px 8px rgba(23, 33, 38, 0.08);
+  color: var(--color-text-primary);
+  padding: 12px 10px 12px 15px;
+  pointer-events: auto;
+  transform-origin: bottom right;
+  animation: toastEnter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition:
+    max-height 180ms ease,
+    margin 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.toast::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 46px 50%, var(--toast-accent-soft), transparent 48%);
+  content: "";
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.success {
+  --toast-accent: #0d7353;
+  --toast-accent-soft: rgba(13, 115, 83, 0.12);
+}
+
+.error {
+  --toast-accent: var(--color-danger);
+  --toast-accent-soft: rgba(180, 35, 24, 0.12);
+}
+
+.warning {
+  --toast-accent: #b77908;
+  --toast-accent-soft: rgba(183, 121, 8, 0.14);
+}
+
+.info {
+  --toast-accent: var(--color-primary);
+  --toast-accent-soft: rgba(0, 156, 255, 0.14);
+}
+
+.exiting {
+  max-height: 0;
+  margin-top: -10px;
+  opacity: 0;
+  transform: translate3d(10px, 8px, 0) scale(0.985);
+}
+
+.iconWrap {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--toast-accent-soft);
+  color: var(--toast-accent);
+  animation: iconSettle 520ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+}
+
+.iconWrap svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.25;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.copy strong {
+  color: var(--color-text-primary);
+  font-size: 0.92rem;
+  font-weight: 780;
+  line-height: 1.2;
+}
+
+.copy span {
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 580;
+  line-height: 1.34;
+}
+
+.close {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-muted);
+  padding: 0;
+}
+
+.close:hover,
+.close:focus-visible {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
+}
+
+.close svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(14px, 10px, 0) scale(0.975);
+  }
+
+  62% {
+    opacity: 1;
+    transform: translate3d(-1px, -1px, 0) scale(1.002);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes iconSettle {
+  from {
+    opacity: 0;
+    transform: scale(0.82) rotate(-5deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@media (max-width: 560px) {
+  .viewport {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    width: auto;
+  }
+
+  .toast {
+    grid-template-columns: 36px minmax(0, 1fr) 28px;
+    gap: 10px;
+    padding: 11px 9px 11px 14px;
+  }
+
+  .iconWrap {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .iconWrap {
+    animation: none;
+    transition-duration: 0.01ms;
+  }
+
+  .exiting {
+    transform: none;
+  }
+}

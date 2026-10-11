@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:sqlserver://invalid-test-db-host.invalid:1433;databaseName=luppa_test;encrypt=true;trustServerCertificate=false}
+    username: ${TEST_DB_USERNAME:luppa_test}
+    password: ${TEST_DB_PASSWORD:}
+  mail:
+    host: localhost
+    username: test
+    password: test
+
+app:
+  production-safety:
+    enabled: false
+  jwt:
+    secret: test-only-256-bit-secret-for-luppa-automated-tests
+  cors:
+    allowed-origins: http://localhost:5173
+  storage:
+    local-directory: ${java.io.tmpdir}/luppa-test/uploads/events
+    public-base-url: http://localhost:8081/uploads/events
+    profile-local-directory: ${java.io.tmpdir}/luppa-test/uploads/profile
+    profile-public-base-url: http://localhost:8081/uploads/profile
+  email:
+    from: test@luppa.test
+    app-base-url: http://localhost:5173
+    terms-url: http://localhost:5173/terms
+    privacy-url: http://localhost:5173/privacy
+    support-to: support@luppa.test
+  bootstrap:
+    admin:
+      email:
+      password:
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

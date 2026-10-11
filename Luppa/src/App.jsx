@@ -1,14 +1,11 @@
-
-import './App.css'
-
+import AppRouter from './routes/AppRouter'
+import { ToastProvider } from './components/common/ToastProvider'
 
 function App() {
   return (
-    <>
-       <div className='container'>
-      <HomeFuncionario/>
-    </div>
-    </>
+    <ToastProvider>
+      <AppRouter />
+    </ToastProvider>
   )
 }
 

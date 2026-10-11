@@ -1,0 +1,100 @@
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.stars:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.starButton,
+.starSlot {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  padding: 0;
+}
+
+.starButton:hover {
+  background: #fff5d8;
+}
+
+.starIcon {
+  position: relative;
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  color: var(--color-border-strong);
+}
+
+.starIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.starIcon path {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 1.15;
+}
+
+.starBase {
+  color: #c9d2d6;
+}
+
+.starFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  color: #d39b00;
+  pointer-events: none;
+}
+
+.starFill svg {
+  display: block;
+  max-width: none;
+}
+
+.value {
+  color: var(--color-text-secondary);
+  font-size: 0.86rem;
+  font-weight: 720;
+}
+
+.readOnly {
+  gap: 6px;
+}
+
+.readOnly .starSlot {
+  width: 20px;
+  height: 20px;
+}
+
+.readOnly .starIcon,
+.readOnly .starIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

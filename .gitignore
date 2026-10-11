@@ -1,0 +1,31 @@
+.idea/
+node_modules/
+Luppa/backend/target/
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.properties
+Luppa/.env
+Luppa/.env.*
+Luppa/backend/src/main/resources/application-local.yml
+Luppa/backend/src/main/resources/application-local.properties
+
+# Local verification/probe artifacts
+*.log
+*.class
+Luppa/.chrome-*/
+Luppa/codex-*
+Luppa/overflow-probe-*
+Luppa/overflow-fixtures/
+Luppa/map-runtime-check.png
+Luppa/vite-*.log
+Luppa/backend/*.log
+Luppa/dist/
+Luppa/backend/target/
+Luppa/backend/uploads/
+
+# Local SQL Server/database files
+*.mdf
+*.ldf
+*.bak

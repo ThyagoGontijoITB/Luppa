@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://${DB_HOST}:${DB_PORT:1433};databaseName=${DB_NAME};encrypt=true;trustServerCertificate=false
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+app:
+  production-safety:
+    enabled: true
+  cors:
+    allowed-origins: ${FRONTEND_URL}
+  jwt:
+    secret: ${JWT_SECRET}
+  storage:
+    local-directory: ${IMAGE_STORAGE_DIR}
+    public-base-url: ${IMAGE_PUBLIC_BASE_URL}
+    profile-local-directory: ${PROFILE_IMAGE_STORAGE_DIR}
+    profile-public-base-url: ${PROFILE_IMAGE_PUBLIC_BASE_URL}
+  email:
+    from: ${LUPPA_EMAIL_FROM}
+    app-base-url: ${APP_BASE_URL}
+    terms-url: ${LUPPA_TERMS_URL}
+    privacy-url: ${LUPPA_PRIVACY_URL}
+    support-to: ${LUPPA_SUPPORT_EMAIL}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    org.hibernate.SQL: warn
+    org.hibernate.orm.jdbc.bind: warn

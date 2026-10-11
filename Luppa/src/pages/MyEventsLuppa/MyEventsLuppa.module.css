@@ -1,0 +1,148 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  padding: 20px;
+}
+
+.header,
+.hero,
+.grid,
+.empty,
+.insightsWrap {
+  width: min(var(--container), 100%);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 46px;
+}
+
+.header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.header a,
+.empty a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 660;
+  padding: 0 10px;
+  text-decoration: none;
+}
+
+.header > a {
+  padding: 0;
+}
+
+.header a:hover,
+.empty a:hover {
+  background: var(--color-surface-inset);
+  color: var(--color-text-primary);
+}
+
+.hero {
+  margin-bottom: 24px;
+}
+
+.hero span {
+  color: var(--color-primary-active);
+  font-size: 0.74rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 760px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-title);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.08;
+  margin: 10px 0 12px;
+}
+
+.hero p,
+.empty p {
+  max-width: 720px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.eventItem {
+  display: grid;
+  gap: 8px;
+}
+
+.rejection {
+  border: 1px solid var(--color-danger-soft);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 12px;
+}
+
+.empty {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  padding: 22px;
+}
+
+.empty h2 {
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  margin: 0 0 8px;
+}
+
+.empty a {
+  width: fit-content;
+  margin-top: 18px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+  padding: 0 14px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 18px;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

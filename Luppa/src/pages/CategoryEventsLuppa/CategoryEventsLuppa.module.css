@@ -1,0 +1,118 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  padding: 20px;
+}
+
+.header,
+.hero,
+.grid,
+.empty,
+.page > :global(section[aria-label="Busca de eventos"]) {
+  width: min(var(--container), 100%);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 46px;
+}
+
+.header > a,
+.header nav > a:not([data-global-nav-action]),
+.hero a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 660;
+  padding: 0 10px;
+  text-decoration: none;
+}
+
+.header > a {
+  padding: 0;
+}
+
+.header > a:hover,
+.header nav > a:not([data-global-nav-action]):hover,
+.hero a:hover {
+  background: var(--color-surface-inset);
+  color: var(--color-text-primary);
+}
+
+.header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.hero {
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  max-width: 820px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-title);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.08;
+  margin: 12px 0;
+}
+
+.hero p {
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.empty {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  margin-top: 28px;
+  padding: 18px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .page {
+    padding: 18px;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header nav {
+    justify-content: flex-start;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

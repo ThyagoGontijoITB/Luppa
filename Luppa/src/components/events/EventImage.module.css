@@ -1,0 +1,18 @@
+.fallback {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(4, 176, 245, 0.12), rgba(32, 40, 44, 0.06)),
+    var(--color-surface-inset);
+  color: var(--color-primary-active);
+  font-weight: 740;
+}
+
+.fallback span {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  padding: 9px 12px;
+}

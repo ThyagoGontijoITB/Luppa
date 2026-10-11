@@ -1,236 +1,133 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import heroEvent from '../../assets/hero-event.png'
-import eventMusic from '../../assets/event-music.png'
-import eventGastronomy from '../../assets/event-gastronomy.png'
-import eventCulture from '../../assets/event-culture.png'
-import eventSports from '../../assets/event-sports.png'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import CreatorActionLink from '../../components/common/CreatorActionLink'
+import Logo from '../../components/common/Logo'
+import LuppaSymbol from '../../components/common/LuppaSymbol'
+import { useToast } from '../../components/common/ToastProvider'
+import UserMenu from '../../components/common/UserMenu'
+import { CalendarIcon, CategoryIcon, LocationIcon } from '../../components/common/Icons'
+import EventDetailsModal from '../../components/events/EventDetailsModal'
+import EventImage from '../../components/events/EventImage'
+import EventSearch from '../../components/events/EventSearch'
+import FieldError from '../../components/forms/FieldError'
+import useEventDetails from '../../hooks/useEventDetails'
+import { formatEventDateTime } from '../../services/eventDateService'
+import { getCategories, getFeaturedEvents, saveEvent, searchEvents } from '../../services/eventService'
+import { isEmail } from '../../utils/validation'
+import { focusFirstInvalidField } from '../../utils/focusFirstInvalidField'
 import styles from './MenuLuppa.module.css'
 
-const events = [
-  {
-    title: 'Festival de Jazz ao Ar Livre',
-    category: 'Música',
-    image: eventMusic,
-    date: '15 de Maio, 2025 - 19h',
-    place: 'Parque Municipal Dom José',
-    participants: '324 participantes',
-    description: 'Uma noite de jazz ao ar livre com artistas locais, praça de alimentação e programação para toda a família.',
-    mapHint: 'Parque Municipal Dom José fica na região central de Barueri, próximo a vias de fácil acesso.',
-  },
-  {
-    title: 'Festival Gastronômico de Barueri',
-    category: 'Gastronomia',
-    image: eventGastronomy,
-    date: '22 de Maio, 2025 - 12h',
-    place: 'Praça das Bandeiras',
-    participants: '567 participantes',
-    description: 'Barracas, chefs convidados e sabores de diferentes regiões reunidos em um encontro gastronômico no centro da cidade.',
-    mapHint: 'Praça das Bandeiras fica no centro de Barueri, em uma área com circulação de pedestres e transporte público.',
-  },
-  {
-    title: 'Exposição de Arte Contemporânea',
-    category: 'Cultura',
-    image: eventCulture,
-    date: '29 de Maio, 2025 - 14h',
-    place: 'Centro Cultural',
-    participants: '189 participantes',
-    description: 'Mostra com obras de artistas independentes, instalações visuais e visitação guiada durante a tarde.',
-    mapHint: 'Centro Cultural de Barueri, ponto de referência para exposições, cursos e apresentações culturais.',
-  },
-  {
-    title: 'Corrida Solidária 5KM Alphaville',
-    category: 'Esportes',
-    image: eventSports,
-    date: '05 de Junho, 2025 - 7h',
-    place: 'Parque Ecológico',
-    participants: '421 participantes',
-    description: 'Corrida de 5 km com inscrição solidária, percurso sinalizado e ponto de apoio para participantes.',
-    mapHint: 'Parque Ecológico, área aberta indicada para atividades esportivas, caminhada e eventos ao ar livre.',
-  },
-]
-
-const categories = [
-  { title: 'Todos', count: `${events.length} eventos`, className: styles.categoryAll, icon: 'all' },
-  { title: 'Música', count: '45 eventos', className: styles.categoryMusic, icon: 'music' },
-  {
-    title: 'Gastronomia',
-    count: '32 eventos',
-    className: styles.categoryGastronomy,
-    icon: 'food',
-  },
-  {
-    title: 'Arte & Cultura',
-    count: '28 eventos',
-    className: styles.categoryCulture,
-    icon: 'culture',
-  },
-  {
-    title: 'Esportes',
-    count: '41 eventos',
-    className: styles.categorySports,
-    icon: 'sports',
-  },
-]
-
-const CalendarIcon = ({ className }) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-)
-
-const LocationIcon = ({ className }) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-)
-
-const UsersIcon = ({ className }) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-)
-
-const CategoryIcon = ({ type }) => {
-  const props = {
-    width: 40,
-    height: 40,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 2,
-  }
-
-  if (type === 'food') {
-    return (
-      <svg {...props}>
-        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-        <path d="M7 2v20" />
-        <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
-      </svg>
-    )
-  }
-
-  if (type === 'culture') {
-    return (
-      <svg {...props}>
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-        <line x1="8" y1="21" x2="16" y2="21" />
-        <line x1="12" y1="17" x2="12" y2="21" />
-      </svg>
-    )
-  }
-
-  if (type === 'sports') {
-    return (
-      <svg {...props}>
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" />
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-      </svg>
-    )
-  }
-
-  if (type === 'all') {
-    return (
-      <svg {...props}>
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-    )
-  }
-
-  return (
-    <svg {...props}>
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
-    </svg>
-  )
+const defaultFilters = {
+  query: '',
+  category: 'all',
+  sort: 'nearest',
 }
 
 const SocialIcon = ({ type }) => {
   if (type === 'instagram') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="17.5" cy="6.5" r="1" />
-      </svg>
-    )
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" /></svg>
   }
 
   if (type === 'facebook') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v5h4v-5h3l1-4h-4V9c0-.6.4-1 1-1Z" />
-      </svg>
-    )
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v5h4v-5h3l1-4h-4V9c0-.6.4-1 1-1Z" /></svg>
   }
 
   if (type === 'x') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 4l16 16M20 4 4 20" />
-      </svg>
-    )
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4 4 20" /></svg>
   }
 
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="m4 7 8 6 8-6" />
-    </svg>
-  )
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></svg>
 }
 
 const MenuLuppa = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const toast = useToast()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState(null)
-  const [selectedCategory, setSelectedCategory] = useState('Todos')
-  const [feedback, setFeedback] = useState('')
-  const filteredEvents = selectedCategory === 'Todos'
-    ? events
-    : events.filter((event) => event.category === selectedCategory || (selectedCategory === 'Arte & Cultura' && event.category === 'Cultura'))
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category)
+  const { selectedEvent, openEventDetails, closeEventDetails, updateSelectedEvent } = useEventDetails()
+  const [filters, setFilters] = useState(defaultFilters)
+  const [contact, setContact] = useState({ name: '', email: '', message: '' })
+  const [contactErrors, setContactErrors] = useState({})
+  const [events, setEvents] = useState([])
+  const [featuredEvents, setFeaturedEvents] = useState([])
+  const [categories, setCategories] = useState([])
+  const contactFormRef = useRef(null)
+  const featuredEvent = featuredEvents[0] || events[0]
+  const agendaEvents = events.filter((event) => event.id !== featuredEvent?.id).slice(0, 4)
+  const visibleCategories = categories.filter((category) => category.id !== 'all')
+
+  useEffect(() => {
+    if (location.state?.toast) {
+      toast.success(location.state.toast)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location, navigate, toast])
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        const [nextEvents, nextCategories, nextFeaturedEvents] = await Promise.all([
+          searchEvents(filters),
+          getCategories(),
+          getFeaturedEvents(),
+        ])
+        if (!active) return
+        setEvents(nextEvents)
+        setFeaturedEvents(nextFeaturedEvents)
+        setCategories(nextCategories)
+      } catch {
+        if (active) toast.error('Não foi possível carregar os eventos.')
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [filters])
+
+  const handleContactSubmit = (event) => {
+    event.preventDefault()
+    const nextErrors = {}
+
+    if (!contact.name.trim()) nextErrors.name = 'Informe seu nome.'
+    if (!contact.email.trim()) nextErrors.email = 'Informe seu email.'
+    else if (!isEmail(contact.email)) nextErrors.email = 'Informe um email válido.'
+    if (!contact.message.trim()) nextErrors.message = 'Escreva uma mensagem.'
+
+    setContactErrors(nextErrors)
+
+    if (Object.keys(nextErrors).length === 0) {
+      setContact({ name: '', email: '', message: '' })
+    } else {
+      window.requestAnimationFrame(() => focusFirstInvalidField(contactFormRef.current))
+    }
   }
-  const showFeedback = (message) => {
-    setFeedback(message)
-    window.setTimeout(() => setFeedback(''), 2600)
+
+  const updateContact = (field, value) => {
+    setContact((current) => ({ ...current, [field]: value }))
+    setContactErrors((current) => ({ ...current, [field]: '' }))
   }
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <nav className={styles.navbar}>
-          <a className={styles.logo} href="#home" aria-label="Luppa">
-            <span className={styles.logoIcon}>L</span>
-            <span>Luppa</span>
+          <a className={styles.logoLink} href="#home" aria-label="Luppa">
+            <LuppaSymbol />
           </a>
 
           <ul className={`${styles.navLinks} ${menuOpen ? styles.navLinksActive : ''}`}>
-            <li><a href="#home">Início</a></li>
-            <li><a href="#eventos">Eventos</a></li>
-            <li><a href="#categorias">Categorias</a></li>
-            <li><Link to="/cadastrar-evento">Cadastrar Evento</Link></li>
-            <li><a href="#sobre">Sobre</a></li>
-            <li><a href="#contato">Contato</a></li>
+            <li><a href="#home" onClick={() => setMenuOpen(false)}>Início</a></li>
+            <li><Link to="/events" onClick={() => setMenuOpen(false)}>Eventos</Link></li>
+            <li><a href="#categorias" onClick={() => setMenuOpen(false)}>Categorias</a></li>
+            <li><CreatorActionLink variant="nav" onClick={() => setMenuOpen(false)}>Cadastrar Evento</CreatorActionLink></li>
+            <li><a href="#sobre" onClick={() => setMenuOpen(false)}>Sobre</a></li>
+            <li><a href="#contato" onClick={() => setMenuOpen(false)}>Contato</a></li>
+            <li className={styles.mobileAuth}><UserMenu /></li>
           </ul>
 
-          <Link className={styles.loginBtn} to="/login-cadastro">Login/Cadastro</Link>
+          <UserMenu className={styles.authMenu} />
 
           <button
             className={`${styles.menuToggle} ${menuOpen ? styles.menuToggleOpen : ''}`}
@@ -248,122 +145,114 @@ const MenuLuppa = () => {
 
       <main className={styles.main} id="home">
         <section className={styles.heroSection}>
-          <div className={styles.heroBackground}>
-            <img src={heroEvent} alt="Eventos vibrantes em Barueri" className={styles.heroImage} />
-            <div className={styles.heroOverlay} />
-          </div>
-
           <div className={styles.heroContainer}>
-            <div className={styles.heroContent}>
+            <div className={styles.heroCopy}>
               <div className={styles.locationBadge}>
                 <LocationIcon className={styles.locationIcon} />
-                <span>Barueri, SP</span>
+                <span>Agenda local de Barueri</span>
               </div>
 
               <h1 className={styles.heroTitle}>
-                Descubra o que acontece em <span className={styles.heroHighlight}>Barueri</span> com o Luppa
+                Encontre o próximo programa da cidade sem perder tempo.
               </h1>
 
               <p className={styles.heroDescription}>
-                Música, arte, gastronomia, esportes e cultura. Tudo em um só lugar.
+                O Luppa organiza eventos de música, cultura, gastronomia e esporte em uma experiência clara para quem participa e para quem divulga.
               </p>
 
               <div className={styles.heroButtons}>
-                <a className={`${styles.btn} ${styles.btnPrimary}`} href="#eventos">
+                <Link className={`${styles.btn} ${styles.btnPrimary}`} to="/events">
                   <CalendarIcon className={styles.btnIcon} />
-                  Explorar Eventos
-                </a>
-                <Link className={`${styles.btn} ${styles.btnOutline}`} to="/cadastrar-evento">
-                  Cadastrar Evento
+                  Ver agenda
                 </Link>
-              </div>
-
-              <div className={styles.heroStats}>
-                <div className={styles.statItem}>
-                  <div className={styles.statNumber}>150+</div>
-                  <div className={styles.statLabel}>Eventos/mês</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statNumber}>50+</div>
-                  <div className={styles.statLabel}>Organizadores</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statNumber}>10k+</div>
-                  <div className={styles.statLabel}>Participantes</div>
-                </div>
+                <CreatorActionLink className={`${styles.btn} ${styles.btnOutline}`}>
+                  Divulgar evento
+                </CreatorActionLink>
               </div>
             </div>
+
+            <aside className={styles.heroAgenda} aria-label="Resumo da agenda">
+              <div className={styles.heroImageFrame}>
+                <EventImage src={featuredEvent?.coverImageUrl} alt={featuredEvent?.title || 'Eventos em Barueri'} className={styles.heroImage} fallbackLabel={featuredEvent?.categoryName || 'Agenda Luppa'} />
+              </div>
+              <div className={styles.agendaHeader}>
+                <span>Em destaque</span>
+                <strong>{featuredEvent?.title || 'Agenda Luppa'}</strong>
+              </div>
+              {featuredEvent && (
+                <button className={styles.featureButton} type="button" onClick={() => openEventDetails(featuredEvent)}>
+                  Ver detalhes do destaque
+                </button>
+              )}
+            </aside>
+          </div>
+
+          <div className={styles.heroSearch}>
+            <EventSearch filters={filters} onChange={setFilters} />
           </div>
         </section>
 
         <section id="eventos" className={styles.eventsSection}>
           <div className={styles.sectionContainer}>
-            <div className={styles.sectionHeader}>
-              <h2>Próximos Eventos</h2>
-              <p>Descubra experiências incríveis acontecendo agora em Barueri</p>
+            <div className={styles.editorialHeader}>
+              <span>Próximos eventos</span>
+              <h2>Uma agenda pensada para decisão rápida.</h2>
+              <p>Compare data, local, categoria e interesse sem depender de uma grade de cards iguais.</p>
             </div>
 
-            <div className={styles.eventsGrid}>
-              {filteredEvents.map((event) => (
-                <article className={styles.eventCard} key={event.title}>
-                  <div className={styles.eventImageWrapper}>
-                    <img src={event.image} alt={event.title} className={styles.eventImage} />
-                    <span className={styles.eventCategory}>{event.category}</span>
-                  </div>
-                  <div className={styles.eventContent}>
-                    <h3>{event.title}</h3>
-                    <div className={styles.eventInfo}>
-                      <CalendarIcon className={styles.eventIcon} />
-                      <span>{event.date}</span>
+            {events.length > 0 ? (
+              <div className={styles.eventEditorial}>
+                {featuredEvent && (
+                  <article className={styles.featuredEvent}>
+                    <EventImage src={featuredEvent.coverImageUrl} alt={featuredEvent.title} className={styles.featuredEventImage} fallbackLabel={featuredEvent.categoryName} />
+                    <div>
+                      <span>{featuredEvent.categoryName}</span>
+                      <h3>{featuredEvent.title}</h3>
+                      <p>{featuredEvent.description}</p>
+                      <button type="button" onClick={() => openEventDetails(featuredEvent)}>Abrir detalhes</button>
                     </div>
-                    <div className={styles.eventInfo}>
-                      <LocationIcon className={styles.eventIcon} />
-                      <span>{event.place}</span>
-                    </div>
-                    <div className={styles.eventInfo}>
-                      <UsersIcon className={styles.eventIcon} />
-                      <span>{event.participants}</span>
-                    </div>
-                    <button
-                      className={styles.eventDetailsBtn}
-                      type="button"
-                      onClick={() => setSelectedEvent(event)}
-                    >
-                      Ver Detalhes
+                  </article>
+                )}
+
+                <div className={styles.eventList}>
+                  {agendaEvents.map((event) => (
+                    <button className={styles.eventRow} type="button" key={event.id} onClick={() => openEventDetails(event)}>
+                      <span className={styles.eventDate}>{formatEventDateTime(event.startDate, event.startTime)}</span>
+                      <span className={styles.eventName}>{event.title}</span>
+                      <span className={styles.eventMeta}>{event.categoryName} · {event.locationName}</span>
                     </button>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className={styles.emptyState}>Nenhum evento encontrado com esses filtros.</p>
+            )}
           </div>
         </section>
 
         <section id="categorias" className={styles.categoriesSection}>
           <div className={styles.sectionContainer}>
-            <div className={styles.sectionHeader}>
-              <h2>Explore por Categoria</h2>
-              <p>Encontre eventos do seu interesse</p>
-            </div>
+            <div className={styles.categoryIndex}>
+              <div className={styles.editorialHeader}>
+                <span>Categorias</span>
+                <h2>Entre pelo tipo de experiência.</h2>
+              </div>
 
-            <div className={styles.categoriesGrid}>
-              {categories.map((category) => (
-                <button
-                  className={`${styles.categoryCard} ${category.className} ${selectedCategory === category.title ? styles.categoryActive : ''}`}
-                  key={category.title}
-                  type="button"
-                  onClick={() => handleCategorySelect(category.title)}
-                >
-                  <div className={styles.categoryIcon}>
+              <div className={styles.categoryList}>
+                {visibleCategories.map((category, index) => (
+                  <Link
+                    className={styles.categoryRow}
+                    key={category.id}
+                    to={`/events/category/${category.slug}`}
+                  >
+                    <span>{String(index + 1).padStart(2, '0')}</span>
                     <CategoryIcon type={category.icon} />
-                  </div>
-                  <h3>{category.title}</h3>
-                  <p>{category.count}</p>
-                </button>
-              ))}
+                    <strong>{category.title}</strong>
+                    <em>{category.count} evento{category.count === 1 ? '' : 's'}</em>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <p className={styles.filterFeedback}>
-              Mostrando {filteredEvents.length} evento{filteredEvents.length === 1 ? '' : 's'} em {selectedCategory}.
-            </p>
           </div>
         </section>
 
@@ -371,7 +260,7 @@ const MenuLuppa = () => {
           <div className={styles.createContent}>
             <h2>Organize seu próprio evento</h2>
             <p>Alcance milhares de pessoas em Barueri e região. Cadastre seu evento de forma rápida e gratuita.</p>
-            <Link to="/cadastrar-evento" className={styles.registerBtn}>Cadastrar Meu Evento</Link>
+            <CreatorActionLink className={styles.registerBtn}>Cadastrar Meu Evento</CreatorActionLink>
           </div>
         </section>
 
@@ -405,27 +294,28 @@ const MenuLuppa = () => {
                 <h2>Contato</h2>
                 <p>Fale com a equipe do Luppa para tirar dúvidas, sugerir melhorias ou pedir apoio com divulgação.</p>
                 <div className={styles.contactList}>
-                  <span>Email: contato@luppa.com</span>
+                  <span>Email: projetoluppa@gmail.com</span>
                   <span>Atendimento: segunda a sexta, 9h às 18h</span>
                   <span>Região: Barueri e Alphaville</span>
                 </div>
               </div>
-              <form className={styles.contactForm}>
+              <form className={styles.contactForm} noValidate ref={contactFormRef} onSubmit={handleContactSubmit}>
                 <label>
                   Nome
-                  <input type="text" placeholder="Seu nome" />
+                  <input type="text" value={contact.name} placeholder="Seu nome" aria-invalid={Boolean(contactErrors.name)} aria-describedby={contactErrors.name ? 'contact-name-error' : undefined} onChange={(event) => updateContact('name', event.target.value)} />
+                  <FieldError id="contact-name-error" message={contactErrors.name} />
                 </label>
                 <label>
                   Email
-                  <input type="email" placeholder="seuemail@email.com" />
+                  <input type="email" value={contact.email} placeholder="seuemail@email.com" aria-invalid={Boolean(contactErrors.email)} aria-describedby={contactErrors.email ? 'contact-email-error' : undefined} onChange={(event) => updateContact('email', event.target.value)} />
+                  <FieldError id="contact-email-error" message={contactErrors.email} />
                 </label>
                 <label>
                   Mensagem
-                  <textarea placeholder="Escreva sua mensagem" rows="4" />
+                  <textarea value={contact.message} placeholder="Escreva sua mensagem" rows="4" aria-invalid={Boolean(contactErrors.message)} aria-describedby={contactErrors.message ? 'contact-message-error' : undefined} onChange={(event) => updateContact('message', event.target.value)} />
+                  <FieldError id="contact-message-error" message={contactErrors.message} />
                 </label>
-                <button type="button" onClick={() => showFeedback('Mensagem enviada com sucesso!')}>
-                  Enviar mensagem
-                </button>
+                <button type="submit">Enviar mensagem</button>
               </form>
             </div>
           </div>
@@ -435,26 +325,15 @@ const MenuLuppa = () => {
       <footer className={styles.footer}>
         <div className={styles.footerContainer}>
           <div className={styles.footerBrand}>
-            <div className={styles.footerLogo}>
-              <span className={styles.footerLogoIcon}>L</span>
-              <span className={styles.logoText}>Luppa</span>
-            </div>
+            <Logo variant="light" />
             <p className={styles.footerDescription}>
               Conectando a comunidade de Barueri aos melhores eventos de música, arte, gastronomia, esportes e cultura.
             </p>
             <div className={styles.socialIcons}>
-              <a href="https://www.instagram.com/" aria-label="Instagram">
-                <SocialIcon type="instagram" />
-              </a>
-              <a href="https://www.facebook.com/" aria-label="Facebook">
-                <SocialIcon type="facebook" />
-              </a>
-              <a href="https://x.com/" aria-label="X">
-                <SocialIcon type="x" />
-              </a>
-              <a href="mailto:contato@luppa.com" aria-label="Email">
-                <SocialIcon type="email" />
-              </a>
+              <a href="https://www.instagram.com/" aria-label="Instagram"><SocialIcon type="instagram" /></a>
+              <a href="https://www.facebook.com/" aria-label="Facebook"><SocialIcon type="facebook" /></a>
+              <a href="https://x.com/" aria-label="X"><SocialIcon type="x" /></a>
+              <a href="mailto:projetoluppa@gmail.com" aria-label="Email"><SocialIcon type="email" /></a>
             </div>
           </div>
 
@@ -463,9 +342,9 @@ const MenuLuppa = () => {
               <h3>Links Rápidos</h3>
               <ul>
                 <li><a href="#home">Início</a></li>
-                <li><a href="#eventos">Eventos</a></li>
+                <li><Link to="/events">Eventos</Link></li>
                 <li><a href="#categorias">Categorias</a></li>
-                <li><Link to="/cadastrar-evento">Para Organizadores</Link></li>
+                <li><CreatorActionLink>Para Organizadores</CreatorActionLink></li>
                 <li><a href="#sobre">Sobre Nós</a></li>
               </ul>
             </div>
@@ -474,7 +353,7 @@ const MenuLuppa = () => {
               <h3>Suporte</h3>
               <ul>
                 <li><a href="#contato">Contato</a></li>
-                <li><a href="#faq">FAQ</a></li>
+                <li><Link to="/faq">FAQ</Link></li>
                 <li><a href="#privacidade">Privacidade</a></li>
                 <li><a href="#termos">Termos de Uso</a></li>
               </ul>
@@ -483,78 +362,24 @@ const MenuLuppa = () => {
         </div>
 
         <div className={styles.footerBottom}>
-          <p>© 2025 Luppa. Todos os direitos reservados. Feito em Barueri.</p>
+          <p>© 2026 Luppa. Todos os direitos reservados. Feito em Barueri.</p>
         </div>
       </footer>
 
-      {selectedEvent && (
-        <div
-          className={styles.modalBackdrop}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="event-details-title"
-          onClick={() => setSelectedEvent(null)}
-        >
-          <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
-            <button
-              className={styles.modalClose}
-              type="button"
-              aria-label="Fechar detalhes"
-              onClick={() => setSelectedEvent(null)}
-            >
-              ×
-            </button>
-            <img src={selectedEvent.image} alt={selectedEvent.title} className={styles.modalImage} />
-            <div className={styles.modalContent}>
-              <span className={styles.eventCategory}>{selectedEvent.category}</span>
-              <div className={styles.detailBlock}>
-                <span>Título</span>
-                <h2 id="event-details-title">{selectedEvent.title}</h2>
-              </div>
-              <div className={styles.detailBlock}>
-                <span>Descrição</span>
-                <p>{selectedEvent.description}</p>
-              </div>
-              <div className={styles.modalInfo}>
-                <div className={styles.detailRow}>
-                  <CalendarIcon className={styles.eventIcon} />
-                  <span><strong>Data e horário</strong>{selectedEvent.date}</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <LocationIcon className={styles.eventIcon} />
-                  <span><strong>Local</strong>{selectedEvent.place}</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <UsersIcon className={styles.eventIcon} />
-                  <span><strong>Participantes</strong>{selectedEvent.participants}</span>
-                </div>
-              </div>
-              <div className={styles.mapPreview}>
-                <div className={styles.mapPin}>
-                  <LocationIcon />
-                </div>
-                <div className={styles.mapRoadOne} />
-                <div className={styles.mapRoadTwo} />
-                <div className={styles.mapLabel}>
-                  <strong>Mapa do local</strong>
-                  <span>{selectedEvent.mapHint}</span>
-                </div>
-              </div>
-              <button
-                className={styles.modalAction}
-                type="button"
-                onClick={() => {
-                  setSelectedEvent(null)
-                  showFeedback('Interesse registrado!')
-                }}
-              >
-                Tenho interesse
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {feedback && <div className={styles.toast}>{feedback}</div>}
+      <EventDetailsModal
+        event={selectedEvent}
+        onClose={closeEventDetails}
+        onEventUpdated={updateSelectedEvent}
+        onInterest={async (event) => {
+          try {
+            await saveEvent(event.id)
+            closeEventDetails()
+            toast.success('Evento salvo.')
+          } catch {
+            toast.error('Entre na sua conta para salvar eventos.')
+          }
+        }}
+      />
     </div>
   )
 }

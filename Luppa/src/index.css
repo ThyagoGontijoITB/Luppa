@@ -1,11 +1,72 @@
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #2c3133;
-  background: #fff;
+  --color-primary: #04b0f5;
+  --color-primary-hover: #039bd8;
+  --color-primary-active: #08799f;
+  --color-primary-soft: #eaf8fe;
+  --color-primary-subtle: rgba(4, 176, 245, 0.1);
+  --color-secondary: #2f768f;
+  --color-background: #f6f7f7;
+  --color-background-soft: #eef2f3;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #fbfcfc;
+  --color-surface-subtle: #f2f5f6;
+  --color-surface-elevated: #ffffff;
+  --color-surface-inset: #edf2f4;
+  --color-border: #dbe3e6;
+  --color-border-strong: #aebec5;
+  --color-text-primary: #172126;
+  --color-text-secondary: #526167;
+  --color-text-muted: #7f8c91;
+  --color-success: #0d7353;
+  --color-success-soft: #e9f6f1;
+  --color-warning: #8d620c;
+  --color-warning-soft: #fff4d8;
+  --color-danger: #b42318;
+  --color-danger-soft: #fff0ed;
+  --shadow-xs: 0 1px 2px rgba(23, 33, 38, 0.04);
+  --shadow-sm: 0 8px 24px rgba(23, 33, 38, 0.07);
+  --shadow-md: 0 24px 70px rgba(23, 33, 38, 0.16);
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --container: 1160px;
+  --font-sans: Geist, "Geist Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-size-display: clamp(2.3rem, 5vw, 4.25rem);
+  --font-size-title: clamp(1.85rem, 3.4vw, 2.8rem);
+  --font-size-section: clamp(1.3rem, 2.2vw, 1.8rem);
+  --font-size-body: 0.98rem;
+  --font-size-small: 0.88rem;
+  --font-size-label: 0.78rem;
+  --focus-ring: 0 0 0 3px rgba(4, 176, 245, 0.2);
+  --transition-fast: 140ms cubic-bezier(.2, 0, .2, 1);
+  --transition-base: 190ms cubic-bezier(.2, 0, .2, 1);
+  --transition: 190ms cubic-bezier(.2, 0, .2, 1);
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+* {
+  min-width: 0;
 }
 
 html {
@@ -16,6 +77,20 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(246, 247, 247, 0) 320px),
+    var(--color-background);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-sans);
 }
 
 button,
@@ -23,6 +98,96 @@ a {
   font: inherit;
 }
 
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+button {
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+button:active:not(:disabled),
+a:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: color-mix(in srgb, var(--color-danger), var(--color-border) 34%) !important;
+  background:
+    linear-gradient(0deg, rgba(180, 35, 24, 0.035), rgba(180, 35, 24, 0.035)),
+    var(--color-surface) !important;
+}
+
+input[aria-invalid="true"]:hover,
+select[aria-invalid="true"]:hover,
+textarea[aria-invalid="true"]:hover {
+  border-color: color-mix(in srgb, var(--color-danger), var(--color-border) 18%) !important;
+}
+
+input[aria-invalid="true"]:focus-visible,
+select[aria-invalid="true"]:focus-visible,
+textarea[aria-invalid="true"]:focus-visible {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9aa6aa;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
 #root {
   min-height: 100vh;
+}
+
+::selection {
+  background: rgba(4, 176, 245, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
