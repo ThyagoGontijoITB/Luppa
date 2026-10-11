@@ -48,15 +48,15 @@ Use `backend/.env.example` as the checklist. Production values must use real HTT
 - `APP_BASE_URL`
 - `LUPPA_TERMS_URL`
 - `LUPPA_PRIVACY_URL`
-- `IMAGE_PUBLIC_BASE_URL`
-- `PROFILE_IMAGE_PUBLIC_BASE_URL`
 - `VITE_API_BASE_URL` in the frontend build environment, unless frontend and API are intentionally served from the same origin.
 
-The Docker image sets these internal defaults, but production should mount them
-on persistent Render storage if uploads must survive deploys and restarts:
+Cloudinary is the active production image provider. These legacy local upload
+settings are not required when Cloudinary is configured:
 
-- `IMAGE_STORAGE_DIR=/app/uploads/events`
-- `PROFILE_IMAGE_STORAGE_DIR=/app/uploads/profile`
+- `IMAGE_STORAGE_DIR`
+- `IMAGE_PUBLIC_BASE_URL`
+- `PROFILE_IMAGE_STORAGE_DIR`
+- `PROFILE_IMAGE_PUBLIC_BASE_URL`
 
 Optional production settings:
 
@@ -111,13 +111,16 @@ The live database must already include the original Luppa schema, reference rows
 
 ## Upload storage
 
-The API stores event and profile images on the filesystem. In production:
+The API stores new event and profile images in Cloudinary. The legacy local
+filesystem settings are only needed if production must continue serving old
+database rows that reference local filenames instead of Cloudinary public IDs.
+In that legacy mode:
 
 - `IMAGE_STORAGE_DIR` and `PROFILE_IMAGE_STORAGE_DIR` must be absolute paths.
 - Both paths must be mounted on persistent storage.
 - `IMAGE_PUBLIC_BASE_URL` and `PROFILE_IMAGE_PUBLIC_BASE_URL` must point to the deployed API `/uploads/...` paths over HTTPS.
 
-Do not deploy uploads to ephemeral instance storage. If the selected host cannot guarantee persistence for those directories, this blocks the TCC deployment until a persistent volume or equivalent storage is configured.
+Do not deploy legacy uploads to ephemeral instance storage.
 
 ## Rate limiting
 

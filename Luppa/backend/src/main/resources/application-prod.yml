@@ -21,10 +21,10 @@ app:
   jwt:
     secret: ${JWT_SECRET}
   storage:
-    local-directory: ${IMAGE_STORAGE_DIR}
-    public-base-url: ${IMAGE_PUBLIC_BASE_URL}
-    profile-local-directory: ${PROFILE_IMAGE_STORAGE_DIR}
-    profile-public-base-url: ${PROFILE_IMAGE_PUBLIC_BASE_URL}
+    local-directory: ${IMAGE_STORAGE_DIR:}
+    public-base-url: ${IMAGE_PUBLIC_BASE_URL:}
+    profile-local-directory: ${PROFILE_IMAGE_STORAGE_DIR:}
+    profile-public-base-url: ${PROFILE_IMAGE_PUBLIC_BASE_URL:}
   email:
     from: ${LUPPA_EMAIL_FROM}
     app-base-url: ${APP_BASE_URL}

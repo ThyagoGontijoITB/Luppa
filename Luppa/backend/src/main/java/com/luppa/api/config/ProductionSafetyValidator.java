@@ -6,7 +6,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.List;
 
 @Component
@@ -20,7 +19,6 @@ public class ProductionSafetyValidator implements ApplicationRunner {
     private final ProductionSafetyProperties properties;
     private final JwtProperties jwtProperties;
     private final CorsProperties corsProperties;
-    private final StorageProperties storageProperties;
     private final CloudinaryProperties cloudinaryProperties;
     private final EmailProperties emailProperties;
     private final Environment environment;
@@ -29,7 +27,6 @@ public class ProductionSafetyValidator implements ApplicationRunner {
             ProductionSafetyProperties properties,
             JwtProperties jwtProperties,
             CorsProperties corsProperties,
-            StorageProperties storageProperties,
             CloudinaryProperties cloudinaryProperties,
             EmailProperties emailProperties,
             Environment environment
@@ -37,7 +34,6 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         this.properties = properties;
         this.jwtProperties = jwtProperties;
         this.corsProperties = corsProperties;
-        this.storageProperties = storageProperties;
         this.cloudinaryProperties = cloudinaryProperties;
         this.emailProperties = emailProperties;
         this.environment = environment;
@@ -53,10 +49,6 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         requireNonLocalUrl("APP_BASE_URL/app.email.app-base-url", emailProperties.appBaseUrl());
         requireNonLocalUrl("LUPPA_TERMS_URL/app.email.terms-url", emailProperties.termsUrl());
         requireNonLocalUrl("LUPPA_PRIVACY_URL/app.email.privacy-url", emailProperties.privacyUrl());
-        requireNonLocalUrl("IMAGE_PUBLIC_BASE_URL/app.storage.public-base-url", storageProperties.publicBaseUrl());
-        requireNonLocalUrl("PROFILE_IMAGE_PUBLIC_BASE_URL/app.storage.profile-public-base-url", storageProperties.profilePublicBaseUrl());
-        requireStorageDirectory("IMAGE_STORAGE_DIR/app.storage.local-directory", storageProperties.localDirectory());
-        requireStorageDirectory("PROFILE_IMAGE_STORAGE_DIR/app.storage.profile-local-directory", storageProperties.profileLocalDirectory());
         requireDatabaseSafety();
         requireCloudinarySafety();
         requireMailSafety();
@@ -108,14 +100,6 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         requirePresent("MAIL_PASSWORD");
         requirePresent("LUPPA_EMAIL_FROM");
         requirePresent("LUPPA_SUPPORT_EMAIL");
-    }
-
-    private void requireStorageDirectory(String name, String value) {
-        requireText(name, value);
-        Path path = Path.of(value);
-        if (!path.isAbsolute()) {
-            fail(name + " must be an absolute path to a persistent mounted volume in production.");
-        }
     }
 
     private void requireNonLocalUrl(String name, List<String> values) {

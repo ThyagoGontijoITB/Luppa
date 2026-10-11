@@ -27,8 +27,6 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
         requireNonLocalHttps(environment, "APP_BASE_URL");
         requireNonLocalHttps(environment, "LUPPA_TERMS_URL");
         requireNonLocalHttps(environment, "LUPPA_PRIVACY_URL");
-        requireNonLocalHttps(environment, "IMAGE_PUBLIC_BASE_URL");
-        requireNonLocalHttps(environment, "PROFILE_IMAGE_PUBLIC_BASE_URL");
         requirePresent(environment, "DB_HOST");
         requirePresent(environment, "DB_NAME");
         requirePresent(environment, "DB_USERNAME");
@@ -36,9 +34,7 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
         if (isLocalHost(environment.getProperty("DB_HOST", ""))) {
             fail("DB_HOST must not be localhost in production.");
         }
-        requirePresent(environment, "CLOUDINARY_CLOUD_NAME");
-        requirePresent(environment, "CLOUDINARY_API_KEY");
-        requirePresent(environment, "CLOUDINARY_API_SECRET");
+        requireCloudinaryConfigured(environment);
         requirePresent(environment, "MAIL_HOST");
         requirePresent(environment, "MAIL_USERNAME");
         requirePresent(environment, "MAIL_PASSWORD");
@@ -86,6 +82,12 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
                         fail(key + " must not point to localhost in production.");
                     }
                 });
+    }
+
+    private void requireCloudinaryConfigured(ConfigurableEnvironment environment) {
+        requirePresent(environment, "CLOUDINARY_CLOUD_NAME");
+        requirePresent(environment, "CLOUDINARY_API_KEY");
+        requirePresent(environment, "CLOUDINARY_API_SECRET");
     }
 
     private String requirePresent(ConfigurableEnvironment environment, String key) {

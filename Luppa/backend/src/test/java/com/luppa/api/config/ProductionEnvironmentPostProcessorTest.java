@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.mock.env.MockEnvironment;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ProductionEnvironmentPostProcessorTest {
@@ -30,6 +31,14 @@ class ProductionEnvironmentPostProcessorTest {
                 .hasMessageContaining("FRONTEND_URL must use HTTPS");
     }
 
+    @Test
+    void acceptsProductionCloudinaryConfigurationWithoutLegacyLocalStorageUrls() {
+        MockEnvironment environment = productionEnvironment();
+
+        assertThatCode(() -> processor.postProcessEnvironment(environment, new SpringApplication()))
+                .doesNotThrowAnyException();
+    }
+
     private MockEnvironment productionEnvironment() {
         MockEnvironment environment = new MockEnvironment();
         environment.setActiveProfiles("prod");
@@ -39,8 +48,6 @@ class ProductionEnvironmentPostProcessorTest {
                 .withProperty("APP_BASE_URL", "https://frontend.example")
                 .withProperty("LUPPA_TERMS_URL", "https://frontend.example/terms")
                 .withProperty("LUPPA_PRIVACY_URL", "https://frontend.example/privacy")
-                .withProperty("IMAGE_PUBLIC_BASE_URL", "https://api.example/uploads/events")
-                .withProperty("PROFILE_IMAGE_PUBLIC_BASE_URL", "https://api.example/uploads/profile")
                 .withProperty("DB_HOST", "db.example")
                 .withProperty("DB_NAME", "luppaBD")
                 .withProperty("DB_USERNAME", "luppa_app")
