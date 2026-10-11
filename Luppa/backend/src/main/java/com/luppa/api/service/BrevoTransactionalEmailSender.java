@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.luppa.api.config.BrevoProperties;
 import com.luppa.api.config.EmailProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class BrevoTransactionalEmailSender implements TransactionalEmailSender {
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
+    @Autowired
     public BrevoTransactionalEmailSender(
             BrevoProperties brevoProperties,
             EmailProperties emailProperties,
