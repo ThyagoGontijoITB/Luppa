@@ -7,6 +7,8 @@ import UserMenu from '../../components/common/UserMenu'
 import EventCard from '../../components/events/EventCard'
 import EventDetailsModal from '../../components/events/EventDetailsModal'
 import EventSearch from '../../components/events/EventSearch'
+import Seo from '../../components/seo/Seo'
+import { absoluteUrl, breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import useEventDetails from '../../hooks/useEventDetails'
 import { getCategoryBySlug, getEventsByCategorySlug, saveEvent, searchEvents } from '../../services/eventService'
 import styles from './CategoryEventsLuppa.module.css'
@@ -19,6 +21,11 @@ const CategoryEventsLuppa = () => {
   const [filters, setFilters] = useState({ query: '', category: slug || 'all', sort: 'nearest' })
   const { selectedEvent, openEventDetails, closeEventDetails, updateSelectedEvent } = useEventDetails()
   const toast = useToast()
+  const categoryTitle = category?.title || 'Categoria de eventos'
+  const categoryDescription = category
+    ? `Encontre eventos de ${category.title.toLowerCase()} publicados no Luppa em Barueri e região.`
+    : 'Confira eventos publicados no Luppa por categoria em Barueri e região.'
+
   useEffect(() => {
     let active = true
     const load = async () => {
@@ -56,6 +63,27 @@ const CategoryEventsLuppa = () => {
 
   return (
     <main className={styles.page}>
+      <Seo
+        title={`${categoryTitle} | Eventos no Luppa`}
+        description={categoryDescription}
+        canonicalPath={`/events/category/${slug}`}
+        noindex={!category}
+        schema={[
+          organizationSchema,
+          breadcrumbSchema([
+            { name: 'Início', path: '/' },
+            { name: 'Eventos', path: '/events' },
+            { name: categoryTitle, path: `/events/category/${slug}` },
+          ]),
+          category && {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: `${category.title} no Luppa`,
+            url: absoluteUrl(`/events/category/${slug}`),
+            description: categoryDescription,
+          },
+        ]}
+      />
       <header className={styles.header}>
         <Link to="/" aria-label="Voltar para o Luppa"><LuppaSymbol /></Link>
         <nav>

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useToast } from '../../components/common/ToastProvider'
 import FieldError from '../../components/forms/FieldError'
 import { useAuth } from '../../auth/authContext'
+import Seo from '../../components/seo/Seo'
+import { breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import { sendSupportMessage } from '../../services/supportService'
 import { isEmail } from '../../utils/validation'
 import { focusFirstInvalidField } from '../../utils/focusFirstInvalidField'
@@ -66,6 +68,25 @@ const SupportPage = () => {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title="Suporte Luppa | Fale com a equipe"
+        description="Entre em contato com a equipe Luppa para dúvidas sobre conta, eventos, denúncias, privacidade ou uso da plataforma."
+        canonicalPath="/support"
+        schema={[
+          organizationSchema,
+          breadcrumbSchema([
+            { name: 'Início', path: '/' },
+            { name: 'Suporte', path: '/support' },
+          ]),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'ContactPage',
+            name: 'Suporte Luppa',
+            url: 'https://luppa-one.vercel.app/support',
+            description: 'Canal de contato público da equipe Luppa.',
+          },
+        ]}
+      />
       <UtilityPageHeader current="support" />
       <main className={styles.supportPage}>
         <div className={styles.supportContainer}>

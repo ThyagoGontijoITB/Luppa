@@ -10,6 +10,8 @@ import EventDetailsModal from '../../components/events/EventDetailsModal'
 import EventImage from '../../components/events/EventImage'
 import EventSearch from '../../components/events/EventSearch'
 import FieldError from '../../components/forms/FieldError'
+import Seo from '../../components/seo/Seo'
+import { breadcrumbSchema, organizationSchema, websiteSchema } from '../../components/seo/seoMetadata'
 import useEventDetails from '../../hooks/useEventDetails'
 import { formatEventDateTime } from '../../services/eventDateService'
 import { getCategories, getFeaturedEvents, saveEvent, searchEvents } from '../../services/eventService'
@@ -111,6 +113,16 @@ const MenuLuppa = () => {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title="Luppa | Descubra e divulgue eventos em Barueri"
+        description="Explore a agenda local de Barueri, filtre eventos por categoria e divulgue experiências de música, cultura, gastronomia e esporte no Luppa."
+        canonicalPath="/"
+        schema={[
+          organizationSchema,
+          websiteSchema,
+          breadcrumbSchema([{ name: 'Início', path: '/' }]),
+        ]}
+      />
       <header className={styles.header}>
         <nav className={styles.navbar}>
           <a className={styles.logoLink} href="#home" aria-label="Luppa">
@@ -354,8 +366,8 @@ const MenuLuppa = () => {
               <ul>
                 <li><a href="#contato">Contato</a></li>
                 <li><Link to="/faq">FAQ</Link></li>
-                <li><a href="#privacidade">Privacidade</a></li>
-                <li><a href="#termos">Termos de Uso</a></li>
+                <li><Link to="/privacy">Privacidade</Link></li>
+                <li><Link to="/terms">Termos de Uso</Link></li>
               </ul>
             </div>
           </div>

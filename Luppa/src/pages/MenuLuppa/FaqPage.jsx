@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SearchIcon } from '../../components/common/Icons'
+import Seo from '../../components/seo/Seo'
+import { breadcrumbSchema, faqSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import { UtilityPageHeader } from './LegalDocumentLayout'
 import styles from './MenuLuppa.module.css'
 
@@ -154,6 +156,19 @@ const FaqPage = () => {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title="Perguntas frequentes | Luppa"
+        description="Tire dúvidas sobre conta, eventos, avaliações, denúncias, segurança e suporte da plataforma Luppa."
+        canonicalPath="/faq"
+        schema={[
+          organizationSchema,
+          breadcrumbSchema([
+            { name: 'Início', path: '/' },
+            { name: 'FAQ', path: '/faq' },
+          ]),
+          faqSchema(faqSections),
+        ]}
+      />
       <UtilityPageHeader current="faq" />
       <main className={styles.faqPage}>
         <div className={styles.faqContainer}>

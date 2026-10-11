@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /profile
+Disallow: /communication-preferences
+Disallow: /cadastrar-evento
+Disallow: /my-events
+Disallow: /creator
+Disallow: /login-cadastro
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /resend-verification
+
+Sitemap: https://luppa-one.vercel.app/sitemap.xml

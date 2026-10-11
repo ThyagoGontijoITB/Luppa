@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import LuppaSymbol from '../../components/common/LuppaSymbol'
+import Seo from '../../components/seo/Seo'
+import { absoluteUrl, breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import styles from './MenuLuppa.module.css'
 
 const UtilityHeader = ({ current = 'legal' }) => (
@@ -81,6 +83,26 @@ const LegalDocumentLayout = ({ document, type }) => {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={`${document.title} | Luppa`}
+        description={document.intro}
+        canonicalPath={`/${type === 'privacy' ? 'privacy' : 'terms'}`}
+        schema={[
+          organizationSchema,
+          breadcrumbSchema([
+            { name: 'Início', path: '/' },
+            { name: document.title, path: `/${type === 'privacy' ? 'privacy' : 'terms'}` },
+          ]),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: document.title,
+            url: absoluteUrl(`/${type === 'privacy' ? 'privacy' : 'terms'}`),
+            description: document.intro,
+            dateModified: document.updatedAt,
+          },
+        ]}
+      />
       <UtilityHeader current={type} />
       <main className={styles.legalPage}>
         <div className={styles.legalContainer}>

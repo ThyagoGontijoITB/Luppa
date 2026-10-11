@@ -7,6 +7,8 @@ import UserMenu from '../../components/common/UserMenu'
 import EventCard from '../../components/events/EventCard'
 import EventDetailsModal from '../../components/events/EventDetailsModal'
 import EventSearch from '../../components/events/EventSearch'
+import Seo from '../../components/seo/Seo'
+import { absoluteUrl, breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import useEventDetails from '../../hooks/useEventDetails'
 import { getFeaturedEvents, groupEventsByCategory, saveEvent, searchEvents } from '../../services/eventService'
 import styles from './ExploreEventsLuppa.module.css'
@@ -160,6 +162,25 @@ const ExploreEventsLuppa = () => {
 
   return (
     <main className={styles.page}>
+      <Seo
+        title="Eventos em Barueri | Agenda Luppa"
+        description="Busque eventos publicados no Luppa, filtre por categoria e encontre opções de música, cultura, gastronomia e esporte em Barueri e região."
+        canonicalPath="/events"
+        schema={[
+          organizationSchema,
+          breadcrumbSchema([
+            { name: 'Início', path: '/' },
+            { name: 'Eventos', path: '/events' },
+          ]),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: 'Eventos em Barueri',
+            url: absoluteUrl('/events'),
+            description: 'Agenda pública de eventos publicados no Luppa.',
+          },
+        ]}
+      />
       <header className={styles.header}>
         <Link to="/" aria-label="Voltar para o Luppa"><LuppaSymbol /></Link>
         <nav>

@@ -22,6 +22,14 @@ import CreatorInsightsLuppa from '../pages/MyEventsLuppa/CreatorInsightsLuppa'
 import ProfileLuppa from '../pages/ProfileLuppa/ProfileLuppa'
 import ProtectedRoute from './ProtectedRoute'
 import { userRoles } from '../constants/users'
+import Seo from '../components/seo/Seo'
+
+const NoIndexPage = ({ children, title = 'Área restrita | Luppa' }) => (
+  <>
+    <Seo title={title} description="Área privada da plataforma Luppa." noindex />
+    {children}
+  </>
+)
 
 const AppRouter = () => {
   return (
@@ -31,11 +39,11 @@ const AppRouter = () => {
           <Route path="/" element={<HomeLuppa />} />
           <Route path="/events" element={<ExploreEventsLuppa />} />
           <Route path="/events/category/:slug" element={<CategoryEventsLuppa />} />
-          <Route path="/login-cadastro" element={<LoginCadastroLuppa />} />
-          <Route path="/forgot-password" element={<AccountActionPage type="forgot" />} />
-          <Route path="/reset-password" element={<AccountActionPage type="reset" />} />
-          <Route path="/verify-email" element={<AccountActionPage type="verify" />} />
-          <Route path="/resend-verification" element={<AccountActionPage type="resend" />} />
+          <Route path="/login-cadastro" element={<NoIndexPage title="Login e cadastro | Luppa"><LoginCadastroLuppa /></NoIndexPage>} />
+          <Route path="/forgot-password" element={<NoIndexPage title="Recuperar senha | Luppa"><AccountActionPage type="forgot" /></NoIndexPage>} />
+          <Route path="/reset-password" element={<NoIndexPage title="Redefinir senha | Luppa"><AccountActionPage type="reset" /></NoIndexPage>} />
+          <Route path="/verify-email" element={<NoIndexPage title="Verificar email | Luppa"><AccountActionPage type="verify" /></NoIndexPage>} />
+          <Route path="/resend-verification" element={<NoIndexPage title="Reenviar verificação | Luppa"><AccountActionPage type="resend" /></NoIndexPage>} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
@@ -44,7 +52,7 @@ const AppRouter = () => {
             path="/profile"
             element={(
               <ProtectedRoute>
-                <ProfileLuppa />
+                <NoIndexPage title="Perfil | Luppa"><ProfileLuppa /></NoIndexPage>
               </ProtectedRoute>
             )}
           />
@@ -52,7 +60,7 @@ const AppRouter = () => {
             path="/communication-preferences"
             element={(
               <ProtectedRoute>
-                <ProfileLuppa />
+                <NoIndexPage title="Preferências de comunicação | Luppa"><ProfileLuppa /></NoIndexPage>
               </ProtectedRoute>
             )}
           />
@@ -60,7 +68,7 @@ const AppRouter = () => {
             path="/cadastrar-evento"
             element={(
               <ProtectedRoute roles={[userRoles.CREATOR, userRoles.ADMIN]}>
-                <CadastroEventoLuppa />
+                <NoIndexPage title="Cadastrar evento | Luppa"><CadastroEventoLuppa /></NoIndexPage>
               </ProtectedRoute>
             )}
           />
@@ -68,7 +76,7 @@ const AppRouter = () => {
             path="/my-events"
             element={(
               <ProtectedRoute roles={[userRoles.CREATOR, userRoles.ADMIN]}>
-                <MyEventsLuppa />
+                <NoIndexPage title="Meus eventos | Luppa"><MyEventsLuppa /></NoIndexPage>
               </ProtectedRoute>
             )}
           />
@@ -76,7 +84,7 @@ const AppRouter = () => {
             path="/creator/insights"
             element={(
               <ProtectedRoute roles={[userRoles.CREATOR, userRoles.ADMIN]}>
-                <CreatorInsightsLuppa />
+                <NoIndexPage title="Insights do criador | Luppa"><CreatorInsightsLuppa /></NoIndexPage>
               </ProtectedRoute>
             )}
           />
@@ -84,7 +92,7 @@ const AppRouter = () => {
             path="/admin"
             element={(
               <ProtectedRoute roles={[userRoles.ADMIN]}>
-                <AdminShell />
+                <NoIndexPage title="Admin Luppa"><AdminShell /></NoIndexPage>
               </ProtectedRoute>
             )}
           >
