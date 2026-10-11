@@ -1,6 +1,7 @@
 package com.luppa.api.service;
 
 import com.luppa.api.config.StorageProperties;
+import com.luppa.api.config.CloudinaryProperties;
 import com.luppa.api.dto.RatingResponse;
 import com.luppa.api.mapper.UserMapper;
 import com.luppa.api.repository.EventRatingView;
@@ -21,7 +22,10 @@ class RatingServiceTest {
     private final RatingService service = new RatingService(ratingRepository, eventRepository);
 
     RatingServiceTest() {
-        new UserMapper(new StorageProperties("uploads/events", "http://localhost:8081/uploads/events", "uploads/profile", "http://localhost:8081/uploads/profile"));
+        new UserMapper(
+                new StorageProperties("uploads/events", "http://localhost:8081/uploads/events", "uploads/profile", "http://localhost:8081/uploads/profile"),
+                new CloudinaryProperties("", "", "", "luppa")
+        );
     }
 
     @Test

@@ -43,6 +43,11 @@ app:
     public-base-url: ${IMAGE_PUBLIC_BASE_URL:http://localhost:8081/uploads/events}
     profile-local-directory: ${PROFILE_IMAGE_STORAGE_DIR:uploads/profile}
     profile-public-base-url: ${PROFILE_IMAGE_PUBLIC_BASE_URL:http://localhost:8081/uploads/profile}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+    api-key: ${CLOUDINARY_API_KEY:}
+    api-secret: ${CLOUDINARY_API_SECRET:}
+    root-folder: ${CLOUDINARY_ROOT_FOLDER:luppa}
   geocoding:
     provider: ${GEOCODING_PROVIDER:none}
     base-url: ${GEOCODING_BASE_URL:}

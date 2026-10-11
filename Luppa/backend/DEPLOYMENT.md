@@ -34,6 +34,9 @@ Use `backend/.env.example` as the checklist. Production values must use real HTT
 - `DB_NAME`
 - `DB_USERNAME`
 - `DB_PASSWORD`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
 - `JWT_SECRET`
 - `MAIL_HOST`
 - `MAIL_PORT`
@@ -65,6 +68,18 @@ Optional production settings:
 - `TRUSTED_PROXY_CIDRS`
 - `GEOCODING_PROVIDER`
 - `GEOCODING_BASE_URL`
+- `CLOUDINARY_ROOT_FOLDER`
+
+## Cloudinary image storage
+
+Profile images and event cover images are uploaded to Cloudinary. The existing
+SQL Server columns keep storing a string reference, now the Cloudinary
+`public_id`, so no schema migration is required.
+
+Do not delete existing local upload files during deployment. Existing database
+rows that still contain legacy filenames continue to be resolved through
+`IMAGE_PUBLIC_BASE_URL` and `PROFILE_IMAGE_PUBLIC_BASE_URL`; new uploads use
+Cloudinary delivery URLs derived from `CLOUDINARY_CLOUD_NAME`.
 
 ## SQL Server
 

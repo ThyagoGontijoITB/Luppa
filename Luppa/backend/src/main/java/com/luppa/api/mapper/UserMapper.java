@@ -1,6 +1,7 @@
 package com.luppa.api.mapper;
 
 import com.luppa.api.dto.UserResponse;
+import com.luppa.api.config.CloudinaryProperties;
 import com.luppa.api.config.StorageProperties;
 import com.luppa.api.entity.User;
 import org.springframework.stereotype.Component;
@@ -8,9 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
     private static StorageProperties storageProperties;
+    private static CloudinaryProperties cloudinaryProperties;
 
-    public UserMapper(StorageProperties storageProperties) {
+    public UserMapper(StorageProperties storageProperties, CloudinaryProperties cloudinaryProperties) {
         UserMapper.storageProperties = storageProperties;
+        UserMapper.cloudinaryProperties = cloudinaryProperties;
     }
 
     public static UserResponse toResponse(User user) {
@@ -37,6 +40,9 @@ public class UserMapper {
         }
         if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("/")) {
             return path;
+        }
+        if (cloudinaryProperties != null && cloudinaryProperties.isConfigured() && cloudinaryProperties.isManagedPublicId(path)) {
+            return cloudinaryProperties.deliveryUrl(path);
         }
         return storageProperties.profilePublicBaseUrl().replaceAll("/$", "") + "/" + path;
     }

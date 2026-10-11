@@ -12,7 +12,8 @@ import org.springframework.context.annotation.Configuration;
         AdminBootstrapProperties.class,
         EmailProperties.class,
         ProductionSafetyProperties.class,
-        RateLimitProperties.class
+        RateLimitProperties.class,
+        CloudinaryProperties.class
 })
 public class AppConfig {
 }

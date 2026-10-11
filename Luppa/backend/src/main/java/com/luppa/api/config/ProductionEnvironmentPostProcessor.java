@@ -36,6 +36,9 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
         if (isLocalHost(environment.getProperty("DB_HOST", ""))) {
             fail("DB_HOST must not be localhost in production.");
         }
+        requirePresent(environment, "CLOUDINARY_CLOUD_NAME");
+        requirePresent(environment, "CLOUDINARY_API_KEY");
+        requirePresent(environment, "CLOUDINARY_API_SECRET");
         requirePresent(environment, "MAIL_HOST");
         requirePresent(environment, "MAIL_USERNAME");
         requirePresent(environment, "MAIL_PASSWORD");

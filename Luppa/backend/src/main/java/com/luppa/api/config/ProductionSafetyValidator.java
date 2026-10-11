@@ -21,6 +21,7 @@ public class ProductionSafetyValidator implements ApplicationRunner {
     private final JwtProperties jwtProperties;
     private final CorsProperties corsProperties;
     private final StorageProperties storageProperties;
+    private final CloudinaryProperties cloudinaryProperties;
     private final EmailProperties emailProperties;
     private final Environment environment;
 
@@ -29,6 +30,7 @@ public class ProductionSafetyValidator implements ApplicationRunner {
             JwtProperties jwtProperties,
             CorsProperties corsProperties,
             StorageProperties storageProperties,
+            CloudinaryProperties cloudinaryProperties,
             EmailProperties emailProperties,
             Environment environment
     ) {
@@ -36,6 +38,7 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         this.jwtProperties = jwtProperties;
         this.corsProperties = corsProperties;
         this.storageProperties = storageProperties;
+        this.cloudinaryProperties = cloudinaryProperties;
         this.emailProperties = emailProperties;
         this.environment = environment;
     }
@@ -55,6 +58,7 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         requireStorageDirectory("IMAGE_STORAGE_DIR/app.storage.local-directory", storageProperties.localDirectory());
         requireStorageDirectory("PROFILE_IMAGE_STORAGE_DIR/app.storage.profile-local-directory", storageProperties.profileLocalDirectory());
         requireDatabaseSafety();
+        requireCloudinarySafety();
         requireMailSafety();
     }
 
@@ -86,6 +90,15 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         }
         if (!url.contains("trustServerCertificate=false")) {
             fail("SQL Server certificate validation is required in production.");
+        }
+    }
+
+    private void requireCloudinarySafety() {
+        requirePresent("CLOUDINARY_CLOUD_NAME");
+        requirePresent("CLOUDINARY_API_KEY");
+        requirePresent("CLOUDINARY_API_SECRET");
+        if (!cloudinaryProperties.isConfigured()) {
+            fail("Cloudinary must be configured in production.");
         }
     }
 

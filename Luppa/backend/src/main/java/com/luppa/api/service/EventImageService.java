@@ -1,96 +1,71 @@
 package com.luppa.api.service;
 
-import com.luppa.api.config.StorageProperties;
 import com.luppa.api.dto.EventImageResponse;
 import com.luppa.api.entity.Event;
 import com.luppa.api.entity.EventImage;
-import com.luppa.api.entity.UserRole;
 import com.luppa.api.exception.ForbiddenOperationException;
 import com.luppa.api.exception.InvalidRequestException;
 import com.luppa.api.exception.ResourceNotFoundException;
 import com.luppa.api.mapper.EventImageMapper;
 import com.luppa.api.repository.EventRepository;
 import com.luppa.api.security.AuthUser;
-import jakarta.annotation.PostConstruct;
+import com.luppa.api.service.image.ImageStorage;
+import com.luppa.api.service.image.ImageStorageException;
+import com.luppa.api.service.image.ImageUploadTarget;
+import com.luppa.api.service.image.StoredImage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class EventImageService {
-    private static final long MAX_SIZE = 2 * 1024 * 1024;
-    private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventImageService.class);
 
     private final EventRepository eventRepository;
-    private final StorageProperties storageProperties;
-    private Path storagePath;
+    private final ImageStorage imageStorage;
 
-    public EventImageService(EventRepository eventRepository, StorageProperties storageProperties) {
+    public EventImageService(EventRepository eventRepository, ImageStorage imageStorage) {
         this.eventRepository = eventRepository;
-        this.storageProperties = storageProperties;
-    }
-
-    @PostConstruct
-    void init() throws IOException {
-        storagePath = Path.of(storageProperties.localDirectory()).toAbsolutePath().normalize();
-        Files.createDirectories(storagePath);
+        this.imageStorage = imageStorage;
     }
 
     @Transactional
     public EventImageResponse replace(Integer eventId, MultipartFile file, AuthUser authUser) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event not found"));
         requireOwnerOrAdmin(event, authUser);
-        validate(file);
+        String oldReference = event.getCoverImagePath();
 
-        if (event.getCoverImagePath() != null && !event.getCoverImagePath().isBlank()) {
-            deleteFile(event.getCoverImagePath());
-        }
-
-        String extension = extension(file.getContentType());
-        String storageKey = UUID.randomUUID() + extension;
-        Path target = storagePath.resolve(storageKey).normalize();
-        if (!target.startsWith(storagePath)) {
-            throw new InvalidRequestException("Invalid image path");
-        }
-
+        StoredImage storedImage;
         try {
-            file.transferTo(target);
-            BufferedImage image = ImageIO.read(target.toFile());
-            if (image == null && !"image/webp".equals(file.getContentType())) {
-                throw new InvalidRequestException("Invalid image file");
-            }
-
-            event.setCoverImagePath(storageKey);
-
-            EventImage eventImage = EventImage.fromPath(event.getId(), storageKey);
-            eventImage.setFileName(file.getOriginalFilename() == null ? storageKey : file.getOriginalFilename());
-            eventImage.setStorageKey(storageKey);
-            eventImage.setUrl(storageProperties.publicBaseUrl() + "/" + storageKey);
-            eventImage.setMimeType(file.getContentType());
-            eventImage.setFileSize(file.getSize());
-            if (image != null) {
-                eventImage.setWidth(image.getWidth());
-                eventImage.setHeight(image.getHeight());
-            }
-            return EventImageMapper.toResponse(eventImage);
-        } catch (IOException exception) {
+            storedImage = imageStorage.upload(file, ImageUploadTarget.EVENT_COVER);
+        } catch (ImageStorageException exception) {
             throw new InvalidRequestException("Could not store image");
         }
+
+        cleanupOnRollback(storedImage.reference());
+        event.setCoverImagePath(storedImage.reference());
+        cleanupAfterCommit(oldReference);
+
+        EventImage eventImage = EventImage.fromPath(event.getId(), storedImage.reference());
+        eventImage.setFileName(file.getOriginalFilename() == null ? storedImage.reference() : file.getOriginalFilename());
+        eventImage.setStorageKey(storedImage.reference());
+        eventImage.setUrl(storedImage.url());
+        eventImage.setMimeType(storedImage.mimeType());
+        eventImage.setFileSize(storedImage.fileSize());
+        eventImage.setWidth(storedImage.width());
+        eventImage.setHeight(storedImage.height());
+        return EventImageMapper.toResponse(eventImage);
     }
 
     @Transactional
     public void delete(Integer eventId, AuthUser authUser) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResourceNotFoundException("Event not found"));
         requireOwnerOrAdmin(event, authUser);
-        deleteFile(event.getCoverImagePath());
+        deleteExplicitly(event.getCoverImagePath());
         event.setCoverImagePath("");
     }
 
@@ -103,38 +78,55 @@ public class EventImageService {
         }
     }
 
-    private void validate(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new InvalidRequestException("Image file is required");
+    private void cleanupAfterCommit(String reference) {
+        if (!imageStorage.isManagedReference(reference)) {
+            return;
         }
-        if (file.getSize() > MAX_SIZE) {
-            throw new InvalidRequestException("Image must be at most 2 MB");
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            deleteCloudinaryImage(reference);
+            return;
         }
-        if (!ALLOWED_TYPES.contains(file.getContentType())) {
-            throw new InvalidRequestException("Only JPEG, PNG and WebP images are allowed");
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                deleteCloudinaryImage(reference);
+            }
+        });
+    }
+
+    private void cleanupOnRollback(String reference) {
+        if (!imageStorage.isManagedReference(reference)) {
+            return;
+        }
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status == STATUS_ROLLED_BACK) {
+                    deleteCloudinaryImage(reference);
+                }
+            }
+        });
+    }
+
+    private void deleteCloudinaryImage(String reference) {
+        try {
+            imageStorage.delete(reference);
+        } catch (ImageStorageException exception) {
+            LOGGER.warn("Could not delete Cloudinary event image reference={}", reference);
         }
     }
 
-    private void deleteFile(String storageKey) {
-        if (storageKey == null || storageKey.isBlank()) {
+    private void deleteExplicitly(String reference) {
+        if (!imageStorage.isManagedReference(reference)) {
             return;
         }
         try {
-            Path target = storagePath.resolve(storageKey).normalize();
-            if (target.startsWith(storagePath)) {
-                Files.deleteIfExists(target);
-            }
-        } catch (IOException ignored) {
-            // Database consistency is more important than failing deletion because of a missing local file.
+            imageStorage.delete(reference);
+        } catch (ImageStorageException exception) {
+            throw new InvalidRequestException("Could not delete image");
         }
-    }
-
-    private String extension(String contentType) {
-        return switch (contentType) {
-            case "image/jpeg" -> ".jpg";
-            case "image/png" -> ".png";
-            case "image/webp" -> ".webp";
-            default -> "";
-        };
     }
 }
