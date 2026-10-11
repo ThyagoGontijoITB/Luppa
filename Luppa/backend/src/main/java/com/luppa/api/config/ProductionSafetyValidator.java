@@ -51,7 +51,7 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         requireNonLocalUrl("LUPPA_PRIVACY_URL/app.email.privacy-url", emailProperties.privacyUrl());
         requireDatabaseSafety();
         requireCloudinarySafety();
-        requireMailSafety();
+        requireEmailSafety();
     }
 
     private void requireStrongJwtSecret() {
@@ -94,10 +94,8 @@ public class ProductionSafetyValidator implements ApplicationRunner {
         }
     }
 
-    private void requireMailSafety() {
-        requirePresent("MAIL_HOST");
-        requirePresent("MAIL_USERNAME");
-        requirePresent("MAIL_PASSWORD");
+    private void requireEmailSafety() {
+        requirePresent("BREVO_API_KEY");
         requirePresent("LUPPA_EMAIL_FROM");
         requirePresent("LUPPA_SUPPORT_EMAIL");
     }

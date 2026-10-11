@@ -123,7 +123,7 @@ class ReportServiceTest {
         Report report = report(40, ReportStatus.PENDING);
         when(reportRepository.findById(40)).thenReturn(Optional.of(report));
         when(statusReportRepository.findById(2)).thenReturn(Optional.of(status(2)));
-        org.mockito.Mockito.doThrow(new IllegalStateException("smtp down"))
+        org.mockito.Mockito.doThrow(new IllegalStateException("email delivery down"))
                 .when(emailService).reportResolved(report.getReporter(), report.getEvent().getTitle(), "Resposta");
 
         TransactionSynchronizationManager.initSynchronization();

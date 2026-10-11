@@ -2,22 +2,15 @@ package com.luppa.api.service;
 
 import com.luppa.api.config.EmailProperties;
 import com.luppa.api.entity.User;
-import jakarta.mail.BodyPart;
-import jakarta.mail.Multipart;
-import jakarta.mail.Session;
-import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.List;
-import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class AccountEmailServiceTest {
     private final EmailProperties properties = new EmailProperties(
@@ -29,14 +22,11 @@ class AccountEmailServiceTest {
             "support@luppa.com"
     );
     private final LuppaEmailTemplateService templates = new LuppaEmailTemplateService(properties);
-    private final JavaMailSender mailSender = mock(JavaMailSender.class);
-    private final AccountEmailService service = new AccountEmailService(properties, templates, mailSender);
+    private final TransactionalEmailSender emailSender = mock(TransactionalEmailSender.class);
+    private final AccountEmailService service = new AccountEmailService(properties, templates, emailSender);
 
     @Test
-    void sendsEveryAccountEmailAsMultipartHtmlWithPlainTextAlternative() throws Exception {
-        when(mailSender.createMimeMessage()).thenAnswer(invocation ->
-                new MimeMessage(Session.getInstance(new Properties()))
-        );
+    void sendsEveryAccountEmailWithHtmlAndPlainTextAlternative() {
         User user = user();
 
         service.passwordReset(user, "reset-token");
@@ -52,60 +42,33 @@ class AccountEmailServiceTest {
         service.internalSupport("User Test", "user@luppa.com", 7, "Conta", "Ajuda", "Mensagem", "2026-10-04T12:00:00");
         service.adminUserMessage(user, "Informação da conta", "Mensagem administrativa.");
 
-        ArgumentCaptor<MimeMessage> messageCaptor = ArgumentCaptor.forClass(MimeMessage.class);
-        verify(mailSender, atLeastOnce()).send(messageCaptor.capture());
-        List<MimeMessage> messages = messageCaptor.getAllValues();
+        ArgumentCaptor<TransactionalEmailMessage> messageCaptor = ArgumentCaptor.forClass(TransactionalEmailMessage.class);
+        verify(emailSender, atLeastOnce()).send(messageCaptor.capture());
+        List<TransactionalEmailMessage> messages = messageCaptor.getAllValues();
 
         assertThat(messages).hasSize(12);
-        for (MimeMessage message : messages) {
-            message.saveChanges();
-            assertThat(message.isMimeType("multipart/*")).isTrue();
-            assertThat(hasMimePart(message.getContent(), "text/plain")).isTrue();
-            assertThat(hasMimePart(message.getContent(), "text/html")).isTrue();
-            assertThat(hasMimePart(message.getContent(), "image/png")).isTrue();
-            assertThat(findMimePart(message.getContent(), "text/html")).contains("cid:luppa-email-logo");
+        for (TransactionalEmailMessage message : messages) {
+            assertThat(message.to()).isNotBlank();
+            assertThat(message.subject()).isNotBlank();
+            assertThat(message.html()).contains("<!doctype html>");
+            assertThat(message.html()).contains("cid:luppa-email-logo");
+            assertThat(message.text()).isNotNull();
         }
     }
 
     @Test
-    void adminUserMessageEscapesHtmlInput() throws Exception {
-        when(mailSender.createMimeMessage()).thenAnswer(invocation ->
-                new MimeMessage(Session.getInstance(new Properties()))
-        );
-
+    void adminUserMessageEscapesHtmlInput() {
         service.adminUserMessage(user(), "<script>alert('x')</script>", "Linha 1\n<img src=x onerror=alert(1)>");
 
-        ArgumentCaptor<MimeMessage> messageCaptor = ArgumentCaptor.forClass(MimeMessage.class);
-        verify(mailSender).send(messageCaptor.capture());
-        MimeMessage message = messageCaptor.getValue();
-        message.saveChanges();
-        String html = findMimePart(message.getContent(), "text/html");
+        ArgumentCaptor<TransactionalEmailMessage> messageCaptor = ArgumentCaptor.forClass(TransactionalEmailMessage.class);
+        verify(emailSender).send(messageCaptor.capture());
+        String html = messageCaptor.getValue().html();
 
         assertThat(html).doesNotContain("<script>");
         assertThat(html).doesNotContain("<img src=x");
         assertThat(html).contains("&lt;script&gt;");
         assertThat(html).contains("&lt;img");
         assertThat(html).contains("Linha 1<br>");
-    }
-
-    private boolean hasMimePart(Object content, String mimeType) throws Exception {
-        return findMimePart(content, mimeType) != null;
-    }
-
-    private String findMimePart(Object content, String mimeType) throws Exception {
-        if (!(content instanceof Multipart multipart)) {
-            return null;
-        }
-        for (int index = 0; index < multipart.getCount(); index++) {
-            BodyPart part = multipart.getBodyPart(index);
-            if (part.isMimeType(mimeType)) {
-                return String.valueOf(part.getContent());
-            }
-            if (part.isMimeType("multipart/*") && hasMimePart(part.getContent(), mimeType)) {
-                return findMimePart(part.getContent(), mimeType);
-            }
-        }
-        return null;
     }
 
     private User user() {

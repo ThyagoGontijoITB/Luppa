@@ -190,12 +190,12 @@ class PendingRegistrationServiceTest {
     }
 
     @Test
-    void smtpFailureAtStartDoesNotCreateCompletedUser() {
+    void emailDeliveryFailureAtStartDoesNotCreateCompletedUser() {
         when(userRepository.existsByEmailIgnoreCase("user@luppa.com")).thenReturn(false);
         when(roleRepository.findByName(UserRole.USER)).thenReturn(Optional.of(role(UserRole.USER)));
         when(pendingRegistrationRepository.findByEmail("user@luppa.com")).thenReturn(Optional.empty());
         when(pendingRegistrationRepository.save(any(PendingRegistration.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        org.mockito.Mockito.doThrow(new IllegalStateException("smtp"))
+        org.mockito.Mockito.doThrow(new IllegalStateException("email delivery failed"))
                 .when(accountEmailService).registrationCode(eq("User Test"), eq("user@luppa.com"), any(String.class));
 
         assertThatThrownBy(() -> service.start(registerRequest()))

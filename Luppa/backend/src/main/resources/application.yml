@@ -18,18 +18,6 @@ spring:
         dialect: org.hibernate.dialect.SQLServerDialect
         format_sql: true
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  mail:
-    host: ${MAIL_HOST:}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: ${MAIL_SMTP_AUTH:true}
-          starttls:
-            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
-
 app:
   production-safety:
     enabled: false
@@ -58,6 +46,11 @@ app:
     terms-url: ${LUPPA_TERMS_URL:http://localhost:5173/terms}
     privacy-url: ${LUPPA_PRIVACY_URL:http://localhost:5173/privacy}
     support-to: ${LUPPA_SUPPORT_EMAIL:projetoluppa@gmail.com}
+  brevo:
+    api-key: ${BREVO_API_KEY:}
+    endpoint: ${BREVO_API_ENDPOINT:https://api.brevo.com/v3/smtp/email}
+    connect-timeout: ${BREVO_CONNECT_TIMEOUT:5s}
+    request-timeout: ${BREVO_REQUEST_TIMEOUT:10s}
   bootstrap:
     admin:
       email: ${ADMIN_EMAIL:}

@@ -38,10 +38,7 @@ Use `backend/.env.example` as the checklist. Production values must use real HTT
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
 - `JWT_SECRET`
-- `MAIL_HOST`
-- `MAIL_PORT`
-- `MAIL_USERNAME`
-- `MAIL_PASSWORD`
+- `BREVO_API_KEY`
 - `LUPPA_EMAIL_FROM`
 - `LUPPA_SUPPORT_EMAIL`
 - `FRONTEND_URL`
@@ -61,8 +58,9 @@ settings are not required when Cloudinary is configured:
 Optional production settings:
 
 - `JWT_EXPIRATION_MINUTES`
-- `MAIL_SMTP_AUTH`
-- `MAIL_SMTP_STARTTLS_ENABLE`
+- `BREVO_API_ENDPOINT`
+- `BREVO_CONNECT_TIMEOUT`
+- `BREVO_REQUEST_TIMEOUT`
 - `LUPPA_EMAIL_LOGO_URL`
 - `RATE_LIMIT_ENABLED`
 - `TRUSTED_PROXY_CIDRS`

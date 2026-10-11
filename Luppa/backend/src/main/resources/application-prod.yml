@@ -7,12 +7,6 @@ spring:
     properties:
       hibernate:
         format_sql: false
-  mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-
 app:
   production-safety:
     enabled: true
@@ -31,6 +25,11 @@ app:
     terms-url: ${LUPPA_TERMS_URL}
     privacy-url: ${LUPPA_PRIVACY_URL}
     support-to: ${LUPPA_SUPPORT_EMAIL}
+  brevo:
+    api-key: ${BREVO_API_KEY}
+    endpoint: ${BREVO_API_ENDPOINT:https://api.brevo.com/v3/smtp/email}
+    connect-timeout: ${BREVO_CONNECT_TIMEOUT:5s}
+    request-timeout: ${BREVO_REQUEST_TIMEOUT:10s}
 
 springdoc:
   api-docs:

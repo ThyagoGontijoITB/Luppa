@@ -50,9 +50,9 @@ public class AdminUserMessageService {
 
         try {
             accountEmailService.adminUserMessage(target, subject, message);
-            logOutcome(authUser.idUsuario(), target.getId(), "smtp_accepted");
+            logOutcome(authUser.idUsuario(), target.getId(), "email_accepted");
         } catch (IllegalStateException exception) {
-            logOutcome(authUser.idUsuario(), target.getId(), "smtp_failed");
+            logOutcome(authUser.idUsuario(), target.getId(), "email_failed");
             throw new InvalidRequestException("Não foi possível enviar a mensagem no momento. Tente novamente mais tarde.");
         }
     }

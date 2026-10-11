@@ -35,9 +35,7 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
             fail("DB_HOST must not be localhost in production.");
         }
         requireCloudinaryConfigured(environment);
-        requirePresent(environment, "MAIL_HOST");
-        requirePresent(environment, "MAIL_USERNAME");
-        requirePresent(environment, "MAIL_PASSWORD");
+        requirePresent(environment, "BREVO_API_KEY");
         requirePresent(environment, "LUPPA_EMAIL_FROM");
         requirePresent(environment, "LUPPA_SUPPORT_EMAIL");
     }

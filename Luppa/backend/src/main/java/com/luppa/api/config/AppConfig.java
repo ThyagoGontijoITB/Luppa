@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
         GeocodingProperties.class,
         AdminBootstrapProperties.class,
         EmailProperties.class,
+        BrevoProperties.class,
         ProductionSafetyProperties.class,
         RateLimitProperties.class,
         CloudinaryProperties.class

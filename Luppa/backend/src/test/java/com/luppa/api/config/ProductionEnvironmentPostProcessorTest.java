@@ -55,9 +55,7 @@ class ProductionEnvironmentPostProcessorTest {
                 .withProperty("CLOUDINARY_CLOUD_NAME", "luppa-test")
                 .withProperty("CLOUDINARY_API_KEY", "not-real")
                 .withProperty("CLOUDINARY_API_SECRET", "not-real")
-                .withProperty("MAIL_HOST", "smtp.example")
-                .withProperty("MAIL_USERNAME", "not-real")
-                .withProperty("MAIL_PASSWORD", "not-real")
+                .withProperty("BREVO_API_KEY", "brevo-api-key")
                 .withProperty("LUPPA_EMAIL_FROM", "no-reply@example.com")
                 .withProperty("LUPPA_SUPPORT_EMAIL", "support@example.com");
     }

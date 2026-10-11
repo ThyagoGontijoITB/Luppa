@@ -3,11 +3,6 @@ spring:
     url: ${TEST_DB_URL:jdbc:sqlserver://invalid-test-db-host.invalid:1433;databaseName=luppa_test;encrypt=true;trustServerCertificate=false}
     username: ${TEST_DB_USERNAME:luppa_test}
     password: ${TEST_DB_PASSWORD:}
-  mail:
-    host: localhost
-    username: test
-    password: test
-
 app:
   production-safety:
     enabled: false
@@ -26,6 +21,11 @@ app:
     terms-url: http://localhost:5173/terms
     privacy-url: http://localhost:5173/privacy
     support-to: support@luppa.test
+  brevo:
+    api-key: test-api-key
+    endpoint: http://localhost:9/v3/smtp/email
+    connect-timeout: 100ms
+    request-timeout: 100ms
   bootstrap:
     admin:
       email:

@@ -2,26 +2,18 @@ package com.luppa.api.service;
 
 import com.luppa.api.config.EmailProperties;
 import com.luppa.api.entity.User;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.MailException;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class AccountEmailService {
     private final EmailProperties properties;
     private final LuppaEmailTemplateService templates;
-    private final JavaMailSender mailSender;
+    private final TransactionalEmailSender emailSender;
 
-    public AccountEmailService(EmailProperties properties, LuppaEmailTemplateService templates, JavaMailSender mailSender) {
+    public AccountEmailService(EmailProperties properties, LuppaEmailTemplateService templates, TransactionalEmailSender emailSender) {
         this.properties = properties;
         this.templates = templates;
-        this.mailSender = mailSender;
+        this.emailSender = emailSender;
     }
 
     public void passwordReset(User user, String token) {
@@ -133,28 +125,7 @@ public class AccountEmailService {
     }
 
     private void send(String to, String subject, String html, String text) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name()
-            );
-            helper.setFrom(properties.from());
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(text == null ? "" : text, html);
-            if (templates.usesInlineLogo()) {
-                helper.addInline(
-                        LuppaEmailTemplateService.INLINE_LOGO_CONTENT_ID,
-                        new ClassPathResource("email/luppa-wordmark-banner.png"),
-                        "image/png"
-                );
-            }
-            mailSender.send(message);
-        } catch (MessagingException | MailException exception) {
-            throw new IllegalStateException("Não foi possível enviar o e-mail transacional.", exception);
-        }
+        emailSender.send(new TransactionalEmailMessage(to, subject, html, text == null ? "" : text));
     }
 
     private String moderationResponseBlock(String responseMessage) {

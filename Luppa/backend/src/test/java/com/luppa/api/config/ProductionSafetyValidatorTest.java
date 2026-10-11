@@ -65,9 +65,7 @@ class ProductionSafetyValidatorTest {
                 .withProperty("CLOUDINARY_CLOUD_NAME", "luppa-prod")
                 .withProperty("CLOUDINARY_API_KEY", "api-key")
                 .withProperty("CLOUDINARY_API_SECRET", "api-secret")
-                .withProperty("MAIL_HOST", "smtp.example")
-                .withProperty("MAIL_USERNAME", "smtp-user")
-                .withProperty("MAIL_PASSWORD", "smtp-password")
+                .withProperty("BREVO_API_KEY", "brevo-api-key")
                 .withProperty("LUPPA_EMAIL_FROM", "no-reply@example.com")
                 .withProperty("LUPPA_SUPPORT_EMAIL", "support@example.com");
     }

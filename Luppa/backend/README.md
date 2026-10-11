@@ -11,6 +11,7 @@ DB_NAME=luppaBD
 DB_USERNAME=luppa_app
 DB_PASSWORD=<configured in the local environment>
 JWT_SECRET=replace-with-at-least-32-characters
+BREVO_API_KEY=<configured in the local environment>
 FRONTEND_URL=http://localhost:5173,http://127.0.0.1:5173
 IMAGE_STORAGE_DIR=uploads/events
 IMAGE_PUBLIC_BASE_URL=http://localhost:8081/uploads/events

@@ -104,10 +104,10 @@ class AdminUserMessageServiceTest {
     }
 
     @Test
-    void smtpFailureIsHandledSafely() {
+    void emailDeliveryFailureIsHandledSafely() {
         User target = user(20, UserRole.USER, "real-user@luppa.com");
         when(userRepository.findById(20)).thenReturn(Optional.of(target));
-        doThrow(new IllegalStateException("smtp credentials leaked detail"))
+        doThrow(new IllegalStateException("provider credentials leaked detail"))
                 .when(accountEmailService).adminUserMessage(target, "Informação", "Mensagem válida para envio.");
 
         assertThatThrownBy(() -> service.send(20, request("Informação", "Mensagem válida para envio."), authUser(1, UserRole.ADMIN)))

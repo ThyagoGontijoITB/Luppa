@@ -28,6 +28,6 @@ public class AdminUserMessageController {
             @AuthenticationPrincipal AuthUser authUser
     ) {
         service.send(idUsuario, request, authUser);
-        return new AdminUserMessageResponse(true, "Mensagem aceita pelo servidor SMTP.");
+        return new AdminUserMessageResponse(true, "Mensagem aceita para envio.");
     }
 }
