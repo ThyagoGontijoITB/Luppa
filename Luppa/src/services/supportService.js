@@ -11,3 +11,9 @@ export const sendSupportMessage = (payload, authenticated = false) => apiRequest
     message: payload.message.trim(),
   },
 })
+
+export const supportErrorMessage = (error) => {
+  if (error.status === 429) return 'Muitas tentativas. Aguarde antes de enviar novamente.'
+  if (error.status === 400) return 'Confira os dados informados e tente novamente.'
+  return 'Não foi possível enviar sua mensagem. Tente novamente mais tarde.'
+}

@@ -5,7 +5,7 @@ import FieldError from '../../components/forms/FieldError'
 import { useAuth } from '../../auth/authContext'
 import Seo from '../../components/seo/Seo'
 import { breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
-import { sendSupportMessage } from '../../services/supportService'
+import { sendSupportMessage, supportErrorMessage } from '../../services/supportService'
 import { isEmail } from '../../utils/validation'
 import { focusFirstInvalidField } from '../../utils/focusFirstInvalidField'
 import { UtilityPageHeader } from './LegalDocumentLayout'
@@ -54,12 +54,12 @@ const SupportPage = () => {
     if (sending) return
     setSending(true)
     try {
-      await sendSupportMessage(form, auth.isAuthenticated)
-      setSuccess('Mensagem enviada para a equipe Luppa.')
+      const result = await sendSupportMessage(form, auth.isAuthenticated)
+      setSuccess(result.message)
       toast.success('Mensagem enviada.')
       setForm({ ...initialForm, name: auth.name || '', email: auth.email || '' })
-    } catch {
-      setError('Não foi possível enviar sua mensagem.')
+    } catch (error) {
+      setError(supportErrorMessage(error))
       toast.error('Não foi possível enviar sua mensagem.')
     } finally {
       setSending(false)

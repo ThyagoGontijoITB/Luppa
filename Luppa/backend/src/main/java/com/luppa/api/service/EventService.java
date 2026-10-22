@@ -16,7 +16,6 @@ import com.luppa.api.entity.UserRole;
 import com.luppa.api.exception.ForbiddenOperationException;
 import com.luppa.api.exception.InvalidRequestException;
 import com.luppa.api.exception.ResourceNotFoundException;
-import com.luppa.api.mapper.EventMapper;
 import com.luppa.api.repository.CategoryRepository;
 import com.luppa.api.repository.EventRepository;
 import com.luppa.api.security.AuthUser;
@@ -34,11 +33,15 @@ public class EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final AccountEmailService emailService;
+    private final EventResponseFactory responses;
+    private final EventDeletionGuard deletionGuard;
 
-    public EventService(EventRepository eventRepository, CategoryRepository categoryRepository, AccountEmailService emailService) {
+    public EventService(EventRepository eventRepository, CategoryRepository categoryRepository, AccountEmailService emailService, EventResponseFactory responses, EventDeletionGuard deletionGuard) {
         this.eventRepository = eventRepository;
         this.categoryRepository = categoryRepository;
         this.emailService = emailService;
+        this.responses = responses;
+        this.deletionGuard = deletionGuard;
     }
 
     @Transactional(readOnly = true)
@@ -47,8 +50,7 @@ public class EventService {
                 .map(Category::getId)
                 .orElse(null);
         Integer statusId = status == null ? null : StatusEvent.idFor(status);
-        return eventRepository.search(blankToNull(search), categoryId, statusId, pageable)
-                .map(EventMapper::toResponse);
+        return responses.page(eventRepository.search(blankToNull(search), categoryId, statusId, pageable));
     }
 
     @Transactional(readOnly = true)
@@ -60,19 +62,19 @@ public class EventService {
                         LocalDateTime.now(),
                         PageRequest.of(0, 1)
                 ).stream().findFirst())
-                .map(EventMapper::toFeaturedResponse)
-                .map(List::of)
+                .map(event -> responses.list(List.of(event), true))
                 .orElseGet(List::of);
     }
 
     @Transactional(readOnly = true)
     public Page<EventResponse> findMine(AuthUser authUser, Pageable pageable) {
-        return eventRepository.findByCreatorId(authUser.idUsuario(), pageable).map(EventMapper::toResponse);
+        requireCreatorOrAdmin(authUser);
+        return responses.page(eventRepository.findByCreatorId(authUser.idUsuario(), pageable));
     }
 
     @Transactional(readOnly = true)
     public EventResponse get(Integer id) {
-        return EventMapper.toResponse(find(id));
+        return responses.one(find(id));
     }
 
     @Transactional
@@ -85,9 +87,9 @@ public class EventService {
         event.setContact(EventContact.fromUser(authUser.user()));
         apply(event, request.title(), request.description(), request.categorySlug(), request.address(),
                 request.latitude(), request.longitude(), request.startDateTime(), request.endDateTime(),
-                request.status() == null ? EventStatus.DRAFT : request.status());
+                creatorStatus(request.status() == null ? EventStatus.DRAFT : request.status(), authUser));
 
-        return EventMapper.toResponse(eventRepository.save(event));
+        return responses.one(eventRepository.save(event));
     }
 
     @Transactional
@@ -96,8 +98,8 @@ public class EventService {
         requireOwnerOrAdmin(event, authUser);
         validateDatesForUpdate(event, request.startDateTime(), request.endDateTime());
         apply(event, request.title(), request.description(), request.categorySlug(), request.address(),
-                request.latitude(), request.longitude(), request.startDateTime(), request.endDateTime(), request.status());
-        return EventMapper.toResponse(event);
+                request.latitude(), request.longitude(), request.startDateTime(), request.endDateTime(), creatorStatus(request.status(), authUser));
+        return responses.one(event);
     }
 
     @Transactional
@@ -113,7 +115,7 @@ public class EventService {
                 emailService.eventRejected(event.getCreator(), event.getTitle());
             }
         }
-        return EventMapper.toResponse(event);
+        return responses.one(event);
     }
 
     @Transactional
@@ -124,7 +126,7 @@ public class EventService {
         eventRepository.clearManualFeatured();
         Event target = find(id);
         target.setDestaquePrincipal(true);
-        return EventMapper.toResponse(findForResponse(target.getId()));
+        return responses.one(findForResponse(target.getId()));
     }
 
     @Transactional
@@ -135,9 +137,17 @@ public class EventService {
 
     @Transactional
     public void delete(Integer id, AuthUser authUser) {
-        Event event = find(id);
+        Event event = eventRepository.findByIdForUpdate(id).orElseThrow(() -> new ResourceNotFoundException("Event not found"));
         requireOwnerOrAdmin(event, authUser);
+        deletionGuard.check(id);
         eventRepository.delete(event);
+        eventRepository.flush(); // Surface FK/trigger conflicts inside this operation; do not cascade history away.
+    }
+
+    private EventStatus creatorStatus(EventStatus requested, AuthUser authUser) {
+        // Publishing remains an administrative decision, including edits of published events.
+        return !authUser.user().getRole().getName().isAdminLike() && requested == EventStatus.PUBLISHED
+                ? EventStatus.REVIEW : requested;
     }
 
     private Event find(Integer id) {
@@ -226,6 +236,7 @@ public class EventService {
     }
 
     private void requireOwnerOrAdmin(Event event, AuthUser authUser) {
+        requireCreatorOrAdmin(authUser);
         User user = authUser.user();
         if (user.getRole().getName().isAdminLike()) {
             return;

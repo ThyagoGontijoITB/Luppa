@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, Integer> {
+    boolean existsByEventId(Integer eventId);
+
     Optional<Rating> findByEventIdAndUserId(Integer eventId, Integer userId);
     List<Rating> findByEventIdOrderByRatedAtDesc(Integer eventId);
     @Query("""

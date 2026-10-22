@@ -33,6 +33,29 @@ class EventFeaturedServiceIntegrationTest {
     @MockBean
     private AccountEmailService accountEmailService;
 
+    @Autowired
+    private SavedEventService savedEventService;
+
+    @Test
+    void interestsRemainConsistentAcrossReadsAndIdempotentMutations() {
+        String suffix = Long.toString(System.nanoTime());
+        Integer creatorId = insertUser("creator-count-" + suffix + "@luppa.test", 1);
+        Integer viewerId = insertUser("viewer-count-" + suffix + "@luppa.test", 2);
+        Integer eventId = insertEvent(creatorId, "Contador " + suffix, 3, false);
+        AuthUser viewer = new AuthUser(userRepository.findById(viewerId).orElseThrow());
+        AuthUser creator = new AuthUser(userRepository.findById(creatorId).orElseThrow());
+        savedEventService.save(eventId, viewer);
+        savedEventService.save(eventId, viewer);
+        assertThat(eventService.get(eventId).interestCount()).isEqualTo(1);
+        assertThat(eventService.findMine(creator, org.springframework.data.domain.PageRequest.of(0, 20)).getContent())
+                .filteredOn(event -> event.id().equals(eventId.longValue()))
+                .extracting(EventResponse::interestCount).containsExactly(1L);
+        assertThat(savedEventService.findMine(viewer)).extracting(item -> item.event().interestCount()).containsExactly(1L);
+        savedEventService.unsave(eventId, viewer);
+        savedEventService.unsave(eventId, viewer);
+        assertThat(eventService.get(eventId).interestCount()).isZero();
+    }
+
     @Test
     void updateFeaturedReturnsFullyMappedResponseAndKeepsOnlyOneManualFeaturedEvent() {
         String suffix = Long.toString(System.nanoTime());

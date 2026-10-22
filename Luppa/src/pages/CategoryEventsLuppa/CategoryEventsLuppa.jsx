@@ -1,8 +1,8 @@
+import useEventRevision from '../../hooks/useEventRevision'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import CreatorActionLink from '../../components/common/CreatorActionLink'
 import LuppaSymbol from '../../components/common/LuppaSymbol'
-import { useToast } from '../../components/common/ToastProvider'
 import UserMenu from '../../components/common/UserMenu'
 import EventCard from '../../components/events/EventCard'
 import EventDetailsModal from '../../components/events/EventDetailsModal'
@@ -10,17 +10,17 @@ import EventSearch from '../../components/events/EventSearch'
 import Seo from '../../components/seo/Seo'
 import { absoluteUrl, breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import useEventDetails from '../../hooks/useEventDetails'
-import { getCategoryBySlug, getEventsByCategorySlug, saveEvent, searchEvents } from '../../services/eventService'
+import { getCategoryBySlug, getEventsByCategorySlug, searchEvents } from '../../services/eventService'
 import styles from './CategoryEventsLuppa.module.css'
 
 const CategoryEventsLuppa = () => {
+  const eventRevision = useEventRevision()
   const { slug } = useParams()
   const [category, setCategory] = useState(null)
   const [events, setEvents] = useState([])
   const [error, setError] = useState('')
   const [filters, setFilters] = useState({ query: '', category: slug || 'all', sort: 'nearest' })
   const { selectedEvent, openEventDetails, closeEventDetails, updateSelectedEvent } = useEventDetails()
-  const toast = useToast()
   const categoryTitle = category?.title || 'Categoria de eventos'
   const categoryDescription = category
     ? `Encontre eventos de ${category.title.toLowerCase()} publicados no Luppa em Barueri e região.`
@@ -49,17 +49,7 @@ const CategoryEventsLuppa = () => {
     return () => {
       active = false
     }
-  }, [filters, slug])
-
-  const showInterest = async (event) => {
-    try {
-      await saveEvent(event.id)
-      closeEventDetails()
-      toast.success('Evento salvo.')
-    } catch {
-      toast.error('Entre na sua conta para salvar eventos.')
-    }
-  }
+  }, [filters, slug, eventRevision])
 
   return (
     <main className={styles.page}>
@@ -114,7 +104,7 @@ const CategoryEventsLuppa = () => {
         <p className={styles.empty}>Confira todas as categorias disponíveis na página de eventos.</p>
       )}
 
-      <EventDetailsModal event={selectedEvent} onClose={closeEventDetails} onInterest={showInterest} onEventUpdated={updateSelectedEvent} />
+      <EventDetailsModal event={selectedEvent} onClose={closeEventDetails} onEventUpdated={updateSelectedEvent} />
     </main>
   )
 }

@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select e from Event e where e.id = :id")
+    Optional<Event> findByIdForUpdate(@Param("id") Integer id);
+
     Page<Event> findByCreatorId(Integer creatorId, Pageable pageable);
 
     @Query("""

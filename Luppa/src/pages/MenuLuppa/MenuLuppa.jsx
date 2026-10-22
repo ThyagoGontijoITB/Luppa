@@ -1,3 +1,4 @@
+import useEventRevision from '../../hooks/useEventRevision'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import CreatorActionLink from '../../components/common/CreatorActionLink'
@@ -14,7 +15,8 @@ import Seo from '../../components/seo/Seo'
 import { breadcrumbSchema, organizationSchema, websiteSchema } from '../../components/seo/seoMetadata'
 import useEventDetails from '../../hooks/useEventDetails'
 import { formatEventDateTime } from '../../services/eventDateService'
-import { getCategories, getFeaturedEvents, saveEvent, searchEvents } from '../../services/eventService'
+import { getCategories, getFeaturedEvents, searchEvents } from '../../services/eventService'
+import { sendSupportMessage, supportErrorMessage } from '../../services/supportService'
 import { isEmail } from '../../utils/validation'
 import { focusFirstInvalidField } from '../../utils/focusFirstInvalidField'
 import styles from './MenuLuppa.module.css'
@@ -42,6 +44,7 @@ const SocialIcon = ({ type }) => {
 }
 
 const MenuLuppa = () => {
+  const eventRevision = useEventRevision()
   const location = useLocation()
   const navigate = useNavigate()
   const toast = useToast()
@@ -50,6 +53,8 @@ const MenuLuppa = () => {
   const [filters, setFilters] = useState(defaultFilters)
   const [contact, setContact] = useState({ name: '', email: '', message: '' })
   const [contactErrors, setContactErrors] = useState({})
+  const [contactSending, setContactSending] = useState(false)
+  const [contactResult, setContactResult] = useState(null)
   const [events, setEvents] = useState([])
   const [featuredEvents, setFeaturedEvents] = useState([])
   const [categories, setCategories] = useState([])
@@ -86,10 +91,12 @@ const MenuLuppa = () => {
     return () => {
       active = false
     }
-  }, [filters])
+  }, [filters, eventRevision, toast])
 
-  const handleContactSubmit = (event) => {
+  const handleContactSubmit = async (event) => {
     event.preventDefault()
+    if (contactSending) return
+    setContactResult(null)
     const nextErrors = {}
 
     if (!contact.name.trim()) nextErrors.name = 'Informe seu nome.'
@@ -100,7 +107,16 @@ const MenuLuppa = () => {
     setContactErrors(nextErrors)
 
     if (Object.keys(nextErrors).length === 0) {
-      setContact({ name: '', email: '', message: '' })
+      setContactSending(true)
+      try {
+        const result = await sendSupportMessage({ ...contact, category: 'Contato', subject: 'Contato pela página inicial' })
+        setContactResult({ success: true, message: result.message })
+        setContact({ name: '', email: '', message: '' })
+      } catch (error) {
+        setContactResult({ success: false, message: supportErrorMessage(error) })
+      } finally {
+        setContactSending(false)
+      }
     } else {
       window.requestAnimationFrame(() => focusFirstInvalidField(contactFormRef.current))
     }
@@ -311,23 +327,24 @@ const MenuLuppa = () => {
                   <span>Região: Barueri e Alphaville</span>
                 </div>
               </div>
-              <form className={styles.contactForm} noValidate ref={contactFormRef} onSubmit={handleContactSubmit}>
+              <form className={styles.contactForm} noValidate ref={contactFormRef} onSubmit={handleContactSubmit} aria-busy={contactSending}>
+                {contactResult && <p role={contactResult.success ? "status" : "alert"}>{contactResult.message}</p>}
                 <label>
                   Nome
-                  <input type="text" value={contact.name} placeholder="Seu nome" aria-invalid={Boolean(contactErrors.name)} aria-describedby={contactErrors.name ? 'contact-name-error' : undefined} onChange={(event) => updateContact('name', event.target.value)} />
+                  <input type="text" maxLength={120} disabled={contactSending} value={contact.name} placeholder="Seu nome" aria-invalid={Boolean(contactErrors.name)} aria-describedby={contactErrors.name ? 'contact-name-error' : undefined} onChange={(event) => updateContact('name', event.target.value)} />
                   <FieldError id="contact-name-error" message={contactErrors.name} />
                 </label>
                 <label>
                   Email
-                  <input type="email" value={contact.email} placeholder="seuemail@email.com" aria-invalid={Boolean(contactErrors.email)} aria-describedby={contactErrors.email ? 'contact-email-error' : undefined} onChange={(event) => updateContact('email', event.target.value)} />
+                  <input type="email" maxLength={120} disabled={contactSending} value={contact.email} placeholder="seuemail@email.com" aria-invalid={Boolean(contactErrors.email)} aria-describedby={contactErrors.email ? 'contact-email-error' : undefined} onChange={(event) => updateContact('email', event.target.value)} />
                   <FieldError id="contact-email-error" message={contactErrors.email} />
                 </label>
                 <label>
                   Mensagem
-                  <textarea value={contact.message} placeholder="Escreva sua mensagem" rows="4" aria-invalid={Boolean(contactErrors.message)} aria-describedby={contactErrors.message ? 'contact-message-error' : undefined} onChange={(event) => updateContact('message', event.target.value)} />
+                  <textarea maxLength={4000} disabled={contactSending} value={contact.message} placeholder="Escreva sua mensagem" rows="4" aria-invalid={Boolean(contactErrors.message)} aria-describedby={contactErrors.message ? 'contact-message-error' : undefined} onChange={(event) => updateContact('message', event.target.value)} />
                   <FieldError id="contact-message-error" message={contactErrors.message} />
                 </label>
-                <button type="submit">Enviar mensagem</button>
+                <button type="submit" disabled={contactSending}>{contactSending ? 'Enviando...' : 'Enviar mensagem'}</button>
               </form>
             </div>
           </div>
@@ -382,15 +399,7 @@ const MenuLuppa = () => {
         event={selectedEvent}
         onClose={closeEventDetails}
         onEventUpdated={updateSelectedEvent}
-        onInterest={async (event) => {
-          try {
-            await saveEvent(event.id)
-            closeEventDetails()
-            toast.success('Evento salvo.')
-          } catch {
-            toast.error('Entre na sua conta para salvar eventos.')
-          }
-        }}
+
       />
     </div>
   )

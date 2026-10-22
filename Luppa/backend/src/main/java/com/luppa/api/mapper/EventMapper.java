@@ -9,15 +9,7 @@ public final class EventMapper {
     private EventMapper() {
     }
 
-    public static EventResponse toResponse(Event event) {
-        return toResponse(event, event.isDestaquePrincipal());
-    }
-
-    public static EventResponse toFeaturedResponse(Event event) {
-        return toResponse(event, true);
-    }
-
-    private static EventResponse toResponse(Event event, boolean featured) {
+    public static EventResponse toResponse(Event event, boolean featured, long interestCount) {
         return new EventResponse(
                 event.getId().longValue(),
                 event.getTitle(),
@@ -35,7 +27,8 @@ public final class EventMapper {
                 featured,
                 EventImageMapper.toResponse(event.getCoverImage()),
                 event.getCreatedAt(),
-                event.getUpdatedAt()
+                event.getUpdatedAt(),
+                interestCount
         );
     }
 

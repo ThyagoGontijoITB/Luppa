@@ -1,7 +1,8 @@
+import useEventRevision from '../../hooks/useEventRevision'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import LuppaSymbol from '../../components/common/LuppaSymbol'
-import EventCard from '../../components/events/EventCard'
+import EventManager from '../../components/events/EventManager'
 import EventDetailsModal from '../../components/events/EventDetailsModal'
 import { useAuth } from '../../auth/authContext'
 import useEventDetails from '../../hooks/useEventDetails'
@@ -9,24 +10,31 @@ import { getMyEvents } from '../../services/eventService'
 import styles from './MyEventsLuppa.module.css'
 
 const MyEventsLuppa = () => {
+  const eventRevision = useEventRevision()
   const auth = useAuth()
   const { selectedEvent, openEventDetails, closeEventDetails, updateSelectedEvent } = useEventDetails()
   const [events, setEvents] = useState([])
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const refreshEvents = async () => {
+    const items = await getMyEvents()
+    setEvents(items)
+    setError('')
+  }
 
   useEffect(() => {
     let active = true
     getMyEvents()
       .then((items) => {
-        if (active) setEvents(items)
+        if (active) { setEvents(items); setError(''); setLoading(false) }
       })
       .catch(() => {
-        if (active) setError('Não foi possível carregar seus eventos.')
+        if (active) { setError('Não foi possível carregar seus eventos.'); setLoading(false) }
       })
     return () => {
       active = false
     }
-  }, [auth.userId])
+  }, [auth.userId, eventRevision])
 
   return (
     <main className={styles.page}>
@@ -46,23 +54,11 @@ const MyEventsLuppa = () => {
         <p>Gerencie os eventos associados à sua conta.</p>
       </section>
 
-      {error ? <p className={styles.empty}>{error}</p> : events.length === 0 ? (
-        <section className={styles.empty}>
-          <h2>Nenhum evento próprio encontrado.</h2>
-          <p>Crie um evento para começar a gerenciar sua programação.</p>
-          <Link to="/cadastrar-evento">Criar evento</Link>
-        </section>
-      ) : (
-        <section className={styles.grid}>
-          {events.map((event) => (
-            <article className={styles.eventItem} key={event.id}>
-              <EventCard event={event} onDetails={openEventDetails} />
-              {event.rejectionReason && (
-                <p className={styles.rejection}><strong>Motivo da rejeição:</strong> {event.rejectionReason}</p>
-              )}
-            </article>
-          ))}
-        </section>
+      {loading ? <p className={styles.empty} role="status">Carregando seus eventos...</p> : error ? <p className={styles.empty} role="alert">{error}</p> : (
+        <div className={styles.management}>
+          {events.length === 0 && <p>Nenhum evento próprio encontrado. Crie um evento para começar.</p>}
+          <EventManager events={events} setEvents={setEvents} refreshAdminData={refreshEvents} onDetails={openEventDetails} />
+        </div>
       )}
       <EventDetailsModal event={selectedEvent} onClose={closeEventDetails} onEventUpdated={updateSelectedEvent} />
     </main>

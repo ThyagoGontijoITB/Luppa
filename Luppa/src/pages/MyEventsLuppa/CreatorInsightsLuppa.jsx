@@ -1,3 +1,4 @@
+import useEventRevision from '../../hooks/useEventRevision'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import LuppaSymbol from '../../components/common/LuppaSymbol'
@@ -6,6 +7,7 @@ import { fetchCreatorEventInsights } from '../../services/eventInsightsService'
 import styles from './MyEventsLuppa.module.css'
 
 const CreatorInsightsLuppa = () => {
+  const eventRevision = useEventRevision()
   const [insights, setInsights] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -29,7 +31,7 @@ const CreatorInsightsLuppa = () => {
     return () => {
       active = false
     }
-  }, [])
+  }, [eventRevision])
 
   return (
     <main className={styles.page}>

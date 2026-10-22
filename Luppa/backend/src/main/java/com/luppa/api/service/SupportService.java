@@ -20,8 +20,9 @@ public class SupportService {
     public SupportContactResponse create(SupportContactRequest request, AuthUser authUser) {
         Integer userId = authUser == null ? null : authUser.idUsuario();
         String timestamp = Instant.now().toString();
-        emailService.supportConfirmation(request.name(), request.email(), request.category(), request.subject());
         emailService.internalSupport(request.name(), request.email(), userId, request.category(), request.subject(), request.message(), timestamp);
-        return new SupportContactResponse(null, "Solicitação enviada para a equipe Luppa.");
+        // A confirmation must never claim receipt before the support message is accepted.
+        // Only one provider operation avoids reporting failure after a successful support send.
+        return new SupportContactResponse(null, "Mensagem aceita pelo serviço de envio para a equipe Luppa.");
     }
 }
