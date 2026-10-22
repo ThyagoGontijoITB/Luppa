@@ -10,6 +10,19 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SavedEventRepository extends JpaRepository<SavedEvent, Integer> {
+    boolean existsByEventId(Integer eventId);
+
+    interface InterestCount {
+        Integer getEventId();
+        long getTotal();
+    }
+
+    @Query("select s.event.id as eventId, count(distinct s.user.id) as total from SavedEvent s where s.event.id in :ids group by s.event.id")
+    List<InterestCount> countInterests(@Param("ids") java.util.Collection<Integer> ids);
+
+    @Query("select count(distinct s.user.id) from SavedEvent s where s.event.id = :id")
+    long countInterest(@Param("id") Integer id);
+
     boolean existsByEventIdAndUserId(Integer eventId, Integer userId);
     Optional<SavedEvent> findByEventIdAndUserId(Integer eventId, Integer userId);
     List<SavedEvent> findByUserIdOrderBySavedAtDesc(Integer userId);

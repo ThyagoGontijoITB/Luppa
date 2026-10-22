@@ -23,6 +23,7 @@ public record EventResponse(
         boolean featured,
         EventImageResponse coverImage,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        long interestCount
 ) {
 }

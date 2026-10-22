@@ -1,3 +1,4 @@
+import { resetRequestCache } from '../services/requestCache'
 import { useEffect, useState } from 'react'
 import { authenticate, fetchCurrentUser, registerAccount } from '../services/authService'
 import { hasPermission, hasRole } from '../services/permissionService'
@@ -12,6 +13,7 @@ const getInitialToken = () => {
 }
 
 const clearStoredAuth = () => {
+  resetRequestCache()
   window.localStorage.removeItem('luppa.auth.user')
   window.localStorage.removeItem('luppa.auth.token')
 }
@@ -50,11 +52,24 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token])
 
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key !== 'luppa.auth.token' && event.key !== null) return
+      resetRequestCache()
+      setUser(null)
+      setToken(getInitialToken())
+      setLoading(Boolean(getInitialToken()))
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   const login = async (credentials) => {
     setLoading(true)
     try {
       const result = await authenticate(credentials)
       if (!result.token) throw new Error('missing_auth_token')
+      resetRequestCache()
       setUser(result.user)
       setToken(result.token)
       window.localStorage.setItem('luppa.auth.user', JSON.stringify(result.user))
@@ -71,6 +86,7 @@ export const AuthProvider = ({ children }) => {
       const result = await registerAccount(payload)
       if (result.requiresEmailVerification) return result
       if (!result.token) throw new Error('missing_auth_token')
+      resetRequestCache()
       setUser(result.user)
       setToken(result.token)
       window.localStorage.setItem('luppa.auth.user', JSON.stringify(result.user))
@@ -88,11 +104,13 @@ export const AuthProvider = ({ children }) => {
   }
 
   const setAuthenticatedUser = (currentUser) => {
+    resetRequestCache()
     setUser(currentUser)
     window.localStorage.setItem('luppa.auth.user', JSON.stringify(currentUser))
   }
 
   const setAuthenticatedSession = (currentUser, currentToken) => {
+    resetRequestCache()
     setUser(currentUser)
     setToken(currentToken)
     window.localStorage.setItem('luppa.auth.user', JSON.stringify(currentUser))

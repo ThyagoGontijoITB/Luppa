@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Integer> {
+    boolean existsByEventId(Integer eventId);
+
     @Override
     @EntityGraph(attributePaths = {"event", "reporter", "reporter.role", "category", "status", "rating", "rating.user"})
     List<Report> findAll();

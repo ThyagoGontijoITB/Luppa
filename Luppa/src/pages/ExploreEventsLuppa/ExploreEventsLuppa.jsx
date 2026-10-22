@@ -1,8 +1,8 @@
+import useEventRevision from '../../hooks/useEventRevision'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import CreatorActionLink from '../../components/common/CreatorActionLink'
 import LuppaSymbol from '../../components/common/LuppaSymbol'
-import { useToast } from '../../components/common/ToastProvider'
 import UserMenu from '../../components/common/UserMenu'
 import EventCard from '../../components/events/EventCard'
 import EventDetailsModal from '../../components/events/EventDetailsModal'
@@ -10,7 +10,7 @@ import EventSearch from '../../components/events/EventSearch'
 import Seo from '../../components/seo/Seo'
 import { absoluteUrl, breadcrumbSchema, organizationSchema } from '../../components/seo/seoMetadata'
 import useEventDetails from '../../hooks/useEventDetails'
-import { getFeaturedEvents, groupEventsByCategory, saveEvent, searchEvents } from '../../services/eventService'
+import { getFeaturedEvents, groupEventsByCategory, searchEvents } from '../../services/eventService'
 import styles from './ExploreEventsLuppa.module.css'
 
 const defaultFilters = {
@@ -117,8 +117,8 @@ const EventRail = ({ events, onDetails }) => {
 }
 
 const ExploreEventsLuppa = () => {
+  const eventRevision = useEventRevision()
   const [filters, setFilters] = useState(defaultFilters)
-  const toast = useToast()
   const { selectedEvent, openEventDetails, closeEventDetails, updateSelectedEvent } = useEventDetails()
   const [filteredEvents, setFilteredEvents] = useState([])
   const [featuredEvents, setFeaturedEvents] = useState([])
@@ -148,17 +148,7 @@ const ExploreEventsLuppa = () => {
     return () => {
       active = false
     }
-  }, [filters])
-
-  const showInterest = async (event) => {
-    try {
-      await saveEvent(event.id)
-      closeEventDetails()
-      toast.success('Evento salvo.')
-    } catch {
-      toast.error('Entre na sua conta para salvar eventos.')
-    }
-  }
+  }, [filters, eventRevision])
 
   return (
     <main className={styles.page}>
@@ -244,7 +234,7 @@ const ExploreEventsLuppa = () => {
         </div>
       </div>
 
-      <EventDetailsModal event={selectedEvent} onClose={closeEventDetails} onInterest={showInterest} onEventUpdated={updateSelectedEvent} />
+      <EventDetailsModal event={selectedEvent} onClose={closeEventDetails} onEventUpdated={updateSelectedEvent} />
     </main>
   )
 }

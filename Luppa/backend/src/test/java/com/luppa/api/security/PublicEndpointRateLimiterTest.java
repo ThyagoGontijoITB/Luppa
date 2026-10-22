@@ -50,6 +50,17 @@ class PublicEndpointRateLimiterTest {
                 .isInstanceOf(RateLimitExceededException.class);
     }
 
+    @Test
+    void limitsSupportByNormalizedAccountAndByIp() {
+        PublicEndpointRateLimiter limiter = limiter(List.of());
+        for (int i = 0; i < 3; i++) limiter.checkPublicSupport(request("203.0.113." + i), "USER@example.com");
+        assertThatThrownBy(() -> limiter.checkPublicSupport(request("203.0.113.4"), "user@example.com"))
+                .isInstanceOf(RateLimitExceededException.class);
+        for (int i = 0; i < 5; i++) limiter.checkPublicSupport(request("192.0.2.5"), "user" + i + "@example.com");
+        assertThatThrownBy(() -> limiter.checkPublicSupport(request("192.0.2.5"), "other@example.com"))
+                .isInstanceOf(RateLimitExceededException.class);
+    }
+
     private PublicEndpointRateLimiter limiter(List<String> trustedProxyCidrs) {
         RateLimitProperties properties = new RateLimitProperties(true, trustedProxyCidrs);
         ClientIpResolver resolver = new ClientIpResolver(properties);

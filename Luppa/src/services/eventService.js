@@ -1,7 +1,7 @@
 import { eventStatusLabels } from '../constants/events'
 import { formatEventDateTime } from './eventDateService'
 import { searchAndSortEvents } from './eventSearchService'
-import { apiPageContent, apiRequest, toApiAssetUrl } from './apiClient'
+import { apiPageContent, apiRequest, hasApiSession, toApiAssetUrl } from './apiClient'
 import { normalizeBackendUser } from './authService'
 import { buildStructuredAddress, formatStructuredAddress } from './eventLocationService'
 
@@ -64,6 +64,8 @@ export const normalizeEvent = (event, extras = {}) => {
     locationName: addressText,
     latitude: event.latitude === null || event.latitude === undefined ? null : Number(event.latitude),
     longitude: event.longitude === null || event.longitude === undefined ? null : Number(event.longitude),
+    startDateTime: event.startDateTime,
+    endDateTime: event.endDateTime,
     startDate: start.date,
     startTime: start.time,
     endDate: end.date,
@@ -75,7 +77,8 @@ export const normalizeEvent = (event, extras = {}) => {
     status,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
-    participants: extras.participants ?? 0,
+    interestCount: Number(event.interestCount ?? 0),
+    participants: Number(event.interestCount ?? 0),
     destaquePrincipal: Boolean(event.destaquePrincipal),
     featured: Boolean(event.featured ?? event.destaquePrincipal),
     organizerSocials: normalizeSocials(extras.socialLinks),
@@ -116,6 +119,7 @@ export const loadEventDetails = async (eventOrId) => {
   let saved = false
   let userReview = null
   try {
+    if (!hasApiSession()) return normalizeEvent(event, { socialLinks, eventRating: averageRating(ratings), reviews: ratings.map(normalizeRating) })
     const [savedStatus, myRatings] = await Promise.all([
       apiRequest(`/api/events/${id}/save`),
       apiRequest('/api/me/ratings'),
@@ -261,7 +265,18 @@ export const getMyRatedEvents = async () => {
   return events
 }
 
-export const getMyEvents = async () => apiPageContent(await apiRequest('/api/events/mine', { query: pageAll })).map(normalizeEvent)
+export const getMyEvents = async () => {
+  const events = []
+  let page = 0
+  let totalPages
+  do {
+    const result = await apiRequest('/api/events/mine', { query: { ...pageAll, page, sort: 'id,asc' } })
+    events.push(...apiPageContent(result).map(normalizeEvent))
+    totalPages = result.totalPages ?? 1
+    page += 1
+  } while (page < totalPages)
+  return events
+}
 
 export const buildEventPayload = (payload) => ({
   title: limit(payload.title || payload.name, 40),
@@ -288,10 +303,14 @@ export const createEvent = async (_events, payload) => normalizeEvent(await apiR
   body: buildEventPayload(payload),
 }))
 
-export const updateEvent = async (_events, eventId, payload) => normalizeEvent(await apiRequest(`/api/events/${eventId}`, {
-  method: 'PUT',
-  body: buildEventPayload(payload),
-}))
+export const updateEvent = async (events, eventId, payload) => {
+  const body = buildEventPayload(payload)
+  const original = events.find(event => event.id === eventId)
+  // Preserve seconds/fractions from SQL Server when editing only content of an older event.
+  if (original?.startDateTime && original.startDate === payload.startDate && original.startTime === payload.startTime) body.startDateTime = original.startDateTime
+  if (original?.endDateTime && original.endDate === payload.endDate && original.endTime === payload.endTime) body.endDateTime = original.endDateTime
+  return normalizeEvent(await apiRequest(`/api/events/${eventId}`, { method: 'PUT', body }))
+}
 
 export const updateEventStatus = async (eventId, status) => normalizeEvent(await apiRequest(`/api/events/${eventId}/status`, {
   method: 'PUT',

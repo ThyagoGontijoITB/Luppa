@@ -1,3 +1,4 @@
+import useEventRevision from '../../hooks/useEventRevision'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../auth/authContext'
@@ -23,6 +24,7 @@ const defaultSavedFilters = { query: '', category: 'all', period: 'all', sort: '
 const defaultReviewFilters = { query: '', category: 'all', rating: 'all', sort: 'recent' }
 
 const ProfileLuppa = () => {
+  const eventRevision = useEventRevision()
   const auth = useAuth()
   const toast = useToast()
   const location = useLocation()
@@ -111,7 +113,7 @@ const ProfileLuppa = () => {
     return () => {
       active = false
     }
-  }, [auth.userId, canCreateEvents])
+  }, [auth.userId, canCreateEvents, eventRevision])
 
   const savedTerm = savedFilters.query.trim().toLowerCase()
   const savedEvents = savedSourceEvents

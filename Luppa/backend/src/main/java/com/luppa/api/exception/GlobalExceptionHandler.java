@@ -22,6 +22,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    ResponseEntity<ApiErrorResponse> integrityConflict(Exception exception, HttpServletRequest request) {
+        return error(HttpStatus.CONFLICT, "A operação conflita com registros vinculados. Preserve o histórico cancelando o evento, ou contate o suporte.", request);
+    }
+
     @ExceptionHandler(ConflictException.class)
     ResponseEntity<ApiErrorResponse> conflict(ConflictException exception, HttpServletRequest request) {
         return error(HttpStatus.CONFLICT, exception.getMessage(), request);

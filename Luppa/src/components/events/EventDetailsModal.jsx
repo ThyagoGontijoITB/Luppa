@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { CalendarIcon, LocationIcon, UsersIcon } from '../common/Icons'
 import StarRating from '../common/StarRating'
 import { formatEventDate, formatEventTime, getEventEnd, getEventStart } from '../../services/eventDateService'
-import { formatParticipants, getEventStatusLabel } from '../../services/eventService'
+import { saveEvent, unsaveEvent, formatParticipants, getEventStatusLabel } from '../../services/eventService'
 import EventImage from './EventImage'
 import EventMap from './EventMap'
 import EventRating from './EventRating'
@@ -20,8 +20,9 @@ const buildShareUrl = (event) => {
   return typeof window !== 'undefined' ? window.location.href : ''
 }
 
-const EventDetailsModal = ({ event, onClose, onInterest, onEventUpdated, preview = false }) => {
+const EventDetailsModal = ({ event, onClose, onEventUpdated, preview = false }) => {
   const toast = useToast()
+  const [interestSaving, setInterestSaving] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [reportedReview, setReportedReview] = useState(null)
@@ -38,6 +39,21 @@ const EventDetailsModal = ({ event, onClose, onInterest, onEventUpdated, preview
   }, [event])
 
   if (!event) return null
+
+  const toggleInterest = async () => {
+    if (interestSaving) return
+    setInterestSaving(true)
+    try {
+      if (event.saved) await unsaveEvent(event.id)
+      else await saveEvent(event.id)
+      await onEventUpdated?.(event)
+      toast.success(event.saved ? 'Evento removido dos salvos.' : 'Evento salvo.')
+    } catch (error) {
+      toast.error(error.status === 401 || error.status === 403 ? 'Entre na sua conta para salvar eventos.' : 'Não foi possível atualizar seu interesse.')
+    } finally {
+      setInterestSaving(false)
+    }
+  }
 
   const submitReport = async (payload) => {
     try {
@@ -145,8 +161,8 @@ const EventDetailsModal = ({ event, onClose, onInterest, onEventUpdated, preview
             </div>
             <EventMap event={event} />
             <div className={styles.actions}>
-              <button className={styles.action} type="button" onClick={() => onInterest?.(event)} disabled={preview}>
-                Tenho interesse
+              <button className={styles.action} type="button" onClick={toggleInterest} disabled={preview || interestSaving}>
+                {interestSaving ? 'Atualizando...' : event.saved ? 'Remover interesse' : 'Tenho interesse'}
               </button>
               <button className={styles.secondaryAction} type="button" onClick={() => setShareOpen(true)}>
                 Compartilhar
